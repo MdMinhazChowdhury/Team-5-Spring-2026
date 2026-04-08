@@ -10,7 +10,7 @@
 ## Tech Stack
 - Frontend: Milton Boyd, Khaleel Theophile, Nyisaiah Hall
 - Backend: Ayden Beach, Nyisaiah Hall
-- Database: Jack Nixon, Nyisaiah Hall
+- Database: Jack Nixon
 
 ## Running Instructions
 1. Clone Repository
