@@ -41,7 +41,7 @@ const RECENT_TRANSACTIONS = [
 
 const BUDGET_ALERTS = [
   { category: 'Entertainment', spent: 120, limit: 150, color: '#336659' },
-  { category: 'Dining Out', spent: 210, limit: 200, color: '#8b5e52' },
+  { category: 'Dining Out', spent: 210, limit: 200, color: '#dc2626' },
 ]
 
 const s = {
@@ -60,7 +60,7 @@ const s = {
   statValue: { fontSize: 28, fontWeight: 700, color: '#0e1c4f' },
   trend: (positive) => ({
     fontSize: 12,
-    color: positive ? '#336659' : '#8b5e52',
+    color: positive ? '#16a34a' : '#dc2626',
     marginTop: 4,
   }),
   sectionTitle: { fontSize: 16, fontWeight: 600, color: '#0e1c4f', marginBottom: 16 },
@@ -83,7 +83,7 @@ const s = {
   txAmt: (positive) => ({
     fontSize: 14,
     fontWeight: 600,
-    color: positive ? '#336659' : '#8b5e52',
+    color: positive ? '#16a34a' : '#dc2626',
   }),
   viewAll: {
     display: 'block',
@@ -184,8 +184,8 @@ export default function Dashboard() {
               <YAxis tick={{ fontSize: 12 }} />
               <Tooltip formatter={(v) => `$${v.toLocaleString()}`} />
               <Legend />
-              <Bar dataKey="income" fill="#336659" name="Income" radius={[3, 3, 0, 0]} />
-              <Bar dataKey="expenses" fill="#bba591" name="Expenses" radius={[3, 3, 0, 0]} />
+              <Bar dataKey="income" fill="#16a34a" name="Income" radius={[3, 3, 0, 0]} />
+              <Bar dataKey="expenses" fill="#dc2626" name="Expenses" radius={[3, 3, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
