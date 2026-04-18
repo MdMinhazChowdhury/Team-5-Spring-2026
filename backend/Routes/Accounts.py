@@ -19,7 +19,7 @@ def get_accounts(token: str = Depends(verify_token)):
         user = supabase.auth.get_user(token)
         user_id = user.user.id
 
-        response = supabase.table("AccountTable").select("*").eq("UserID", user_id).execute()
+        response = supabase.table("Account").select("*").eq("UserID", user_id).execute()
 
         accounts = []
         for row in response.data:
@@ -45,7 +45,7 @@ def create_account(request: AccountCreate, token: str = Depends(verify_token)):
         if request.account_type_id not in ACCOUNT_TYPES:
             raise HTTPException(status_code=400, detail="Invalid account type. Use 1 for Checking or 2 for Savings.")
 
-        response = supabase.table("AccountTable").insert({
+        response = supabase.table("Account").insert({
             "AccountBalance": request.account_balance,
             "AccountTypeID": request.account_type_id,
             "UserID": user_id,
@@ -72,11 +72,11 @@ def delete_account(account_id: int, token: str = Depends(verify_token)):
         user_id = user.user.id
 
         # Verify ownership before deleting
-        existing = supabase.table("AccountTable").select("AccountID").eq("AccountID", account_id).eq("UserID", user_id).execute()
+        existing = supabase.table("Account").select("AccountID").eq("AccountID", account_id).eq("UserID", user_id).execute()
         if not existing.data:
             raise HTTPException(status_code=404, detail="Account not found or access denied.")
 
-        supabase.table("AccountTable").delete().eq("AccountID", account_id).execute()
+        supabase.table("Account").delete().eq("AccountID", account_id).execute()
 
         return {"message": "Account deleted successfully"}
 
