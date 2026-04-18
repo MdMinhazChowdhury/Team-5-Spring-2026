@@ -35,7 +35,7 @@ const s = {
     border: 'none',
     fontSize: 20,
     cursor: 'pointer',
-    color: '#bba591',
+    color: '#8c7260',
     lineHeight: 1,
     padding: '4px 8px',
     fontFamily: 'inherit',
@@ -49,7 +49,7 @@ const s = {
   sectionTitle: {
     fontSize: 14,
     fontWeight: 600,
-    color: '#bba591',
+    color: '#8c7260',
     marginBottom: 16,
     paddingBottom: 8,
     borderBottom: '1px solid #f3efe8',
@@ -66,7 +66,7 @@ const s = {
   input: {
     width: '100%',
     padding: '10px 14px',
-    border: '1px solid #bba591',
+    border: '1px solid #8c7260',
     borderRadius: 8,
     fontSize: 14,
     outline: 'none',
@@ -132,12 +132,12 @@ const s = {
   },
   accountBalance: {
     fontSize: 13,
-    color: '#bba591',
+    color: '#8c7260',
     marginTop: 2,
   },
   deleteBtn: {
     background: 'none',
-    border: '1px solid #bba591',
+    border: '1px solid #8c7260',
     borderRadius: 6,
     color: '#8b5e52',
     cursor: 'pointer',
@@ -154,7 +154,7 @@ const s = {
   },
   select: {
     padding: '10px 12px',
-    border: '1px solid #bba591',
+    border: '1px solid #8c7260',
     borderRadius: 8,
     fontSize: 14,
     fontFamily: 'inherit',
@@ -164,7 +164,7 @@ const s = {
   },
   balanceInput: {
     padding: '10px 14px',
-    border: '1px solid #bba591',
+    border: '1px solid #8c7260',
     borderRadius: 8,
     fontSize: 14,
     fontFamily: 'inherit',
@@ -186,7 +186,7 @@ const s = {
   },
   emptyAccounts: {
     fontSize: 14,
-    color: '#bba591',
+    color: '#8c7260',
     textAlign: 'center',
     padding: '16px 0',
   },

@@ -54,7 +54,7 @@ const styles = {
     gap: 12,
     padding: '10px 12px',
     borderRadius: 8,
-    color: '#bba591',
+    color: '#8c7260',
     fontSize: 15,
     fontWeight: 500,
     transition: 'background 0.15s, color 0.15s',
@@ -94,7 +94,7 @@ const styles = {
     fontWeight: 600,
   },
   userEmail: {
-    color: '#bba591',
+    color: '#8c7260',
     fontSize: 12,
   },
 }

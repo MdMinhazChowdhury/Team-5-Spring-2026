@@ -28,7 +28,7 @@ const s = {
   brandAccent: { color: '#336659' },
   subtitle: {
     fontSize: 14,
-    color: '#bba591',
+    color: '#8c7260',
     textAlign: 'center',
     marginBottom: 32,
   },
@@ -42,7 +42,7 @@ const s = {
   input: {
     width: '100%',
     padding: '10px 14px',
-    border: '1px solid #bba591',
+    border: '1px solid #8c7260',
     borderRadius: 8,
     fontSize: 15,
     outline: 'none',
@@ -83,7 +83,7 @@ const s = {
     marginTop: 20,
     textAlign: 'center',
     fontSize: 14,
-    color: '#bba591',
+    color: '#8c7260',
   },
   toggleLink: {
     color: '#336659',

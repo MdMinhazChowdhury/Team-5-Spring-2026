@@ -47,7 +47,7 @@ const BUDGET_ALERTS = [
 const s = {
   page: { display: 'flex', flexDirection: 'column', gap: 24 },
   heading: { fontSize: 26, fontWeight: 700, color: '#0e1c4f', marginBottom: 4 },
-  sub: { fontSize: 14, color: '#bba591' },
+  sub: { fontSize: 14, color: '#8c7260' },
   grid4: { display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 },
   grid2: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 },
   card: {
@@ -56,7 +56,7 @@ const s = {
     padding: 20,
     boxShadow: '0 1px 6px rgba(14,28,79,0.07)',
   },
-  cardTitle: { fontSize: 13, color: '#bba591', fontWeight: 500, marginBottom: 8, letterSpacing: '0.04em' },
+  cardTitle: { fontSize: 13, color: '#8c7260', fontWeight: 500, marginBottom: 8, letterSpacing: '0.04em' },
   statValue: { fontSize: 28, fontWeight: 700, color: '#0e1c4f' },
   trend: (positive) => ({
     fontSize: 12,
@@ -78,8 +78,8 @@ const s = {
     borderBottom: '1px solid #f3efe8',
   },
   txDesc: { fontSize: 14, fontWeight: 500, color: '#0e1c4f' },
-  txCat: { fontSize: 12, color: '#bba591' },
-  txDate: { fontSize: 12, color: '#bba591', marginRight: 16 },
+  txCat: { fontSize: 12, color: '#8c7260' },
+  txDate: { fontSize: 12, color: '#8c7260', marginRight: 16 },
   txAmt: (positive) => ({
     fontSize: 14,
     fontWeight: 600,
