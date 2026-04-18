@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { NavLink } from 'react-router-dom'
 import {
   LayoutDashboard,
@@ -7,6 +8,8 @@ import {
   BarChart2,
   User,
 } from 'lucide-react'
+import { userApi } from '../services/api'
+import EditProfileModal from './EditProfileModal'
 
 const NAV_ITEMS = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard },
@@ -66,6 +69,13 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     gap: 12,
+    cursor: 'pointer',
+    background: 'none',
+    border: 'none',
+    width: '100%',
+    textAlign: 'left',
+    transition: 'background 0.15s',
+    borderRadius: 0,
   },
   avatar: {
     width: 36,
@@ -90,38 +100,71 @@ const styles = {
 }
 
 export default function Navbar() {
+  const [userProfile, setUserProfile] = useState(null)
+  const [showEditModal, setShowEditModal] = useState(false)
+
+  useEffect(() => {
+    userApi.getProfile()
+      .then(setUserProfile)
+      .catch(() => {}) // silently fail if not authenticated
+  }, [])
+
+  function handleProfileUpdated(updates) {
+    setUserProfile((prev) => ({ ...prev, ...updates }))
+  }
+
+  const displayName = userProfile
+    ? `${userProfile.first_name} ${userProfile.last_name}`.trim() || userProfile.email
+    : '…'
+  const displayEmail = userProfile?.email || ''
+
   return (
-    <aside style={styles.sidebar}>
-      <div style={styles.brand}>
-        Finance<span style={styles.brandAccent}>Tracker</span>
-      </div>
-
-      <nav style={styles.nav}>
-        {NAV_ITEMS.map(({ to, label, icon: Icon }) => (
-          <NavLink
-            key={to}
-            to={to}
-            end={to === '/'}
-            style={({ isActive }) => ({
-              ...styles.navLink,
-              ...(isActive ? styles.navLinkActive : {}),
-            })}
-          >
-            <Icon size={18} />
-            {label}
-          </NavLink>
-        ))}
-      </nav>
-
-      <div style={styles.userSection}>
-        <div style={styles.avatar}>
-          <User size={18} />
+    <>
+      <aside style={styles.sidebar}>
+        <div style={styles.brand}>
+          Finance<span style={styles.brandAccent}>Tracker</span>
         </div>
-        <div>
-          <div style={styles.userName}>John Doe</div>
-          <div style={styles.userEmail}>john@example.com</div>
-        </div>
-      </div>
-    </aside>
+
+        <nav style={styles.nav}>
+          {NAV_ITEMS.map(({ to, label, icon: Icon }) => (
+            <NavLink
+              key={to}
+              to={to}
+              end={to === '/'}
+              style={({ isActive }) => ({
+                ...styles.navLink,
+                ...(isActive ? styles.navLinkActive : {}),
+              })}
+            >
+              <Icon size={18} />
+              {label}
+            </NavLink>
+          ))}
+        </nav>
+
+        <button
+          style={styles.userSection}
+          onClick={() => setShowEditModal(true)}
+          onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.05)')}
+          onMouseLeave={(e) => (e.currentTarget.style.background = 'none')}
+        >
+          <div style={styles.avatar}>
+            <User size={18} />
+          </div>
+          <div>
+            <div style={styles.userName}>{displayName}</div>
+            {displayEmail && <div style={styles.userEmail}>{displayEmail}</div>}
+          </div>
+        </button>
+      </aside>
+
+      {showEditModal && (
+        <EditProfileModal
+          user={userProfile}
+          onClose={() => setShowEditModal(false)}
+          onProfileUpdated={handleProfileUpdated}
+        />
+      )}
+    </>
   )
 }
