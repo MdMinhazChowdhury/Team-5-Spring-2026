@@ -43,7 +43,6 @@ const s = {
   title: {
     fontSize: 22,
     fontWeight: 700,
-    fontStyle: 'italic',
     color: '#0e1c4f',
     marginBottom: 24,
   },
@@ -190,7 +189,6 @@ const s = {
     color: '#bba591',
     textAlign: 'center',
     padding: '16px 0',
-    fontStyle: 'italic',
   },
 }
 

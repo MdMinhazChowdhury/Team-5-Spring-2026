@@ -46,7 +46,7 @@ const BUDGET_ALERTS = [
 
 const s = {
   page: { display: 'flex', flexDirection: 'column', gap: 24 },
-  heading: { fontSize: 26, fontWeight: 700, fontStyle: 'italic', color: '#0e1c4f', marginBottom: 4 },
+  heading: { fontSize: 26, fontWeight: 700, color: '#0e1c4f', marginBottom: 4 },
   sub: { fontSize: 14, color: '#bba591' },
   grid4: { display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 },
   grid2: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 },
@@ -63,7 +63,7 @@ const s = {
     color: positive ? '#336659' : '#8b5e52',
     marginTop: 4,
   }),
-  sectionTitle: { fontSize: 16, fontWeight: 600, fontStyle: 'italic', color: '#0e1c4f', marginBottom: 16 },
+  sectionTitle: { fontSize: 16, fontWeight: 600, color: '#0e1c4f', marginBottom: 16 },
   progressTrack: {
     background: '#f3efe8',
     borderRadius: 999,
@@ -92,7 +92,6 @@ const s = {
     fontSize: 14,
     color: '#336659',
     fontWeight: 500,
-    fontStyle: 'italic',
   },
   alertRow: {
     marginBottom: 12,

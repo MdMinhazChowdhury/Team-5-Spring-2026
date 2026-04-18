@@ -37,7 +37,6 @@ const styles = {
     fontWeight: 700,
     padding: '0 24px 32px',
     letterSpacing: '0.3px',
-    fontStyle: 'italic',
   },
   brandAccent: {
     color: '#faecc3',

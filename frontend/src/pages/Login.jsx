@@ -21,7 +21,6 @@ const s = {
   brand: {
     fontSize: 26,
     fontWeight: 700,
-    fontStyle: 'italic',
     color: '#0e1c4f',
     marginBottom: 8,
     textAlign: 'center',
