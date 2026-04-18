@@ -50,6 +50,13 @@ const s = {
     boxSizing: 'border-box',
     fontFamily: 'inherit',
   },
+  nameRow: {
+    display: 'flex',
+    gap: 12,
+  },
+  nameField: {
+    flex: 1,
+  },
   button: {
     width: '100%',
     padding: '12px',
@@ -69,29 +76,60 @@ const s = {
     fontSize: 14,
     marginBottom: 16,
   },
+  toggleRow: {
+    marginTop: 20,
+    textAlign: 'center',
+    fontSize: 14,
+    color: '#64748b',
+  },
+  toggleLink: {
+    color: '#3b5bdb',
+    fontWeight: 600,
+    cursor: 'pointer',
+    background: 'none',
+    border: 'none',
+    fontSize: 14,
+    padding: 0,
+    marginLeft: 4,
+  },
 }
 
 export default function Login() {
+  const [mode, setMode] = useState('login')
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
 
+  function switchMode(next) {
+    setMode(next)
+    setError('')
+  }
+
   async function handleSubmit(e) {
     e.preventDefault()
     setError('')
     setLoading(true)
     try {
-      const data = await authApi.login(email, password)
-      localStorage.setItem('token', data.access_token)
+      if (mode === 'login') {
+        const data = await authApi.login(email, password)
+        localStorage.setItem('token', data.access_token)
+      } else {
+        const data = await authApi.signup(firstName, lastName, email, password)
+        localStorage.setItem('token', data.access_token)
+      }
       navigate('/', { replace: true })
     } catch (err) {
-      setError(err.message || 'Login failed')
+      setError(err.message || (mode === 'login' ? 'Login failed' : 'Signup failed'))
     } finally {
       setLoading(false)
     }
   }
+
+  const isSignup = mode === 'signup'
 
   return (
     <div style={s.page}>
@@ -99,11 +137,39 @@ export default function Login() {
         <div style={s.brand}>
           Finance<span style={s.brandAccent}>Tracker</span>
         </div>
-        <div style={s.subtitle}>Sign in to your account</div>
+        <div style={s.subtitle}>{isSignup ? 'Create your account' : 'Sign in to your account'}</div>
 
         {error && <div style={s.error}>{error}</div>}
 
         <form onSubmit={handleSubmit}>
+          {isSignup && (
+            <div style={s.nameRow}>
+              <div style={s.nameField}>
+                <label style={s.label}>First Name</label>
+                <input
+                  style={s.input}
+                  type="text"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  placeholder="Jane"
+                  required
+                  autoFocus
+                />
+              </div>
+              <div style={s.nameField}>
+                <label style={s.label}>Last Name</label>
+                <input
+                  style={s.input}
+                  type="text"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  placeholder="Smith"
+                  required
+                />
+              </div>
+            </div>
+          )}
+
           <label style={s.label}>Email</label>
           <input
             style={s.input}
@@ -112,7 +178,7 @@ export default function Login() {
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
             required
-            autoFocus
+            autoFocus={!isSignup}
           />
 
           <label style={s.label}>Password</label>
@@ -126,9 +192,16 @@ export default function Login() {
           />
 
           <button style={s.button} type="submit" disabled={loading}>
-            {loading ? 'Signing in…' : 'Sign In'}
+            {loading ? (isSignup ? 'Creating account…' : 'Signing in…') : (isSignup ? 'Create Account' : 'Sign In')}
           </button>
         </form>
+
+        <div style={s.toggleRow}>
+          {isSignup ? 'Already have an account?' : "Don't have an account?"}
+          <button style={s.toggleLink} onClick={() => switchMode(isSignup ? 'login' : 'signup')}>
+            {isSignup ? 'Sign In' : 'Sign Up'}
+          </button>
+        </div>
       </div>
     </div>
   )
