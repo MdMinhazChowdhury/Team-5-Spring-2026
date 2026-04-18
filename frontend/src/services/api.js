@@ -31,6 +31,16 @@ export const transactionApi = {
       method: 'DELETE',
       headers: authHeader(),
     }),
+
+  getMonthlyIncome: (year, month) =>
+    fetch(`${BASE_URL}/transactions/monthly-income?year=${year}&month=${month}`, {
+      headers: authHeader(),
+    }).then((r) => r.json()),
+
+  getMonthlySpending: (year, month) =>
+    fetch(`${BASE_URL}/transactions/monthly-spending?year=${year}&month=${month}`, {
+      headers: authHeader(),
+    }).then((r) => r.json()),
 }
 
 export const authApi = {

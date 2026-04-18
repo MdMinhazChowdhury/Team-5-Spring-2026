@@ -11,7 +11,15 @@ import {
   ResponsiveContainer,
 } from 'recharts'
 import SpendingChart from '../components/SpendingChart'
-import { userApi } from '../services/api'
+import { userApi, accountsApi, transactionApi } from '../services/api'
+
+// Set to true to use hardcoded mock data instead of live API calls
+const USE_MOCK_DATA = true
+
+const MOCK_ACCOUNTS = [
+  { account_id: 1, account_type_name: 'Checking', account_balance: 3200.50 },
+  { account_id: 2, account_type_name: 'Savings', account_balance: 9640.00 },
+]
 
 const SPENDING_DATA = [
   { name: 'Rent', value: 1500, color: '#0e1c4f' },
@@ -48,6 +56,41 @@ const s = {
   page: { display: 'flex', flexDirection: 'column', gap: 24 },
   heading: { fontSize: 26, fontWeight: 700, color: '#0e1c4f', marginBottom: 4 },
   sub: { fontSize: 14, color: '#8c7260', fontWeight: 600 },
+  accountsRow: {
+    display: 'flex',
+    gap: 12,
+    overflowX: 'auto',
+    paddingBottom: 4,
+  },
+  accountCard: {
+    background: '#fff',
+    borderRadius: 12,
+    padding: '16px 20px',
+    boxShadow: '0 1px 6px rgba(14,28,79,0.07)',
+    minWidth: 160,
+    flexShrink: 0,
+  },
+  accountType: {
+    fontSize: 13,
+    color: '#8c7260',
+    fontWeight: 600,
+    marginBottom: 8,
+    letterSpacing: '0.04em',
+  },
+  accountBalance: {
+    fontSize: 22,
+    fontWeight: 700,
+    color: '#0e1c4f',
+  },
+  emptyAccounts: {
+    fontSize: 14,
+    color: '#8c7260',
+    fontWeight: 600,
+    padding: '16px 20px',
+    background: '#fff',
+    borderRadius: 12,
+    boxShadow: '0 1px 6px rgba(14,28,79,0.07)',
+  },
   grid4: { display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 },
   grid2: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 },
   card: {
@@ -60,7 +103,7 @@ const s = {
   statValue: { fontSize: 28, fontWeight: 700, color: '#0e1c4f' },
   trend: (positive) => ({
     fontSize: 12,
-    color: positive ? '#16a34a' : '#dc2626',
+    color: positive === undefined ? '#8c7260' : positive ? '#16a34a' : '#dc2626',
     marginTop: 4,
   }),
   sectionTitle: { fontSize: 16, fontWeight: 600, color: '#0e1c4f', marginBottom: 16 },
@@ -115,12 +158,38 @@ function StatCard({ title, value, trend, trendPositive, extra }) {
   )
 }
 
+function fmt(value) {
+  if (value === null) return '...'
+  return `$${Number(value).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+}
+
 export default function Dashboard() {
   const savingsGoalPct = Math.round((1240 / 5000) * 100)
   const [firstName, setFirstName] = useState('')
+  const [accounts, setAccounts] = useState(USE_MOCK_DATA ? MOCK_ACCOUNTS : [])
+  const [totalBalance, setTotalBalance] = useState(USE_MOCK_DATA ? 12840.50 : null)
+  const [monthlyIncome, setMonthlyIncome] = useState(USE_MOCK_DATA ? 4200.00 : null)
+  const [monthlyExpenses, setMonthlyExpenses] = useState(USE_MOCK_DATA ? 2800.21 : null)
 
   useEffect(() => {
     userApi.getProfile().then((u) => setFirstName(u.first_name)).catch(() => {})
+
+    if (!USE_MOCK_DATA) {
+      const now = new Date()
+      const year = now.getFullYear()
+      const month = now.getMonth() + 1
+
+      Promise.all([
+        accountsApi.getAll(),
+        transactionApi.getMonthlyIncome(year, month),
+        transactionApi.getMonthlySpending(year, month),
+      ]).then(([accts, income, expenses]) => {
+        setAccounts(accts)
+        setTotalBalance(accts.reduce((sum, a) => sum + a.account_balance, 0))
+        setMonthlyIncome(income.total)
+        setMonthlyExpenses(expenses.total)
+      }).catch(() => {})
+    }
   }, [])
 
   return (
@@ -130,23 +199,36 @@ export default function Dashboard() {
         <div style={s.sub}>Welcome back{firstName ? `, ${firstName}` : ''}. Here's your financial overview.</div>
       </div>
 
+      {/* Account cards */}
+      <div style={s.accountsRow}>
+        {accounts.length === 0 ? (
+          <div style={s.emptyAccounts}>No accounts linked — add one in your profile.</div>
+        ) : (
+          accounts.map((acct) => (
+            <div key={acct.account_id} style={s.accountCard}>
+              <div style={s.accountType}>{acct.account_type_name}</div>
+              <div style={s.accountBalance}>{fmt(acct.account_balance)}</div>
+            </div>
+          ))
+        )}
+      </div>
+
       {/* Stat cards */}
       <div style={s.grid4}>
         <StatCard
           title="Total Balance"
-          value="$12,840.50"
-          trend="▲ 2.4% from last month"
-          trendPositive={true}
+          value={fmt(totalBalance)}
+          trend="Across all accounts"
         />
         <StatCard
           title="Monthly Income"
-          value="$4,200.00"
+          value={fmt(monthlyIncome)}
           trend="▲ Stable"
           trendPositive={true}
         />
         <StatCard
           title="Monthly Expenses"
-          value="$2,800.21"
+          value={fmt(monthlyExpenses)}
           trend="▼ 5.1% from last month"
           trendPositive={true}
         />
