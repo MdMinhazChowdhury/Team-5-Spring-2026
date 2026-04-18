@@ -14,12 +14,12 @@ import SpendingChart from '../components/SpendingChart'
 import { userApi } from '../services/api'
 
 const SPENDING_DATA = [
-  { name: 'Rent', value: 1500, color: '#3b5bdb' },
-  { name: 'Groceries', value: 580, color: '#40c057' },
-  { name: 'Transport', value: 220, color: '#f59e0b' },
-  { name: 'Utilities', value: 180, color: '#fa5252' },
-  { name: 'Entertainment', value: 120, color: '#be4bdb' },
-  { name: 'Other', value: 200, color: '#74c0fc' },
+  { name: 'Rent', value: 1500, color: '#0e1c4f' },
+  { name: 'Groceries', value: 580, color: '#336659' },
+  { name: 'Transport', value: 220, color: '#bba591' },
+  { name: 'Utilities', value: 180, color: '#8b5e52' },
+  { name: 'Entertainment', value: 120, color: '#6b8f86' },
+  { name: 'Other', value: 200, color: '#c9a882' },
 ]
 
 const BAR_DATA = [
@@ -40,32 +40,32 @@ const RECENT_TRANSACTIONS = [
 ]
 
 const BUDGET_ALERTS = [
-  { category: 'Entertainment', spent: 120, limit: 150, color: '#f59e0b' },
-  { category: 'Dining Out', spent: 210, limit: 200, color: '#fa5252' },
+  { category: 'Entertainment', spent: 120, limit: 150, color: '#336659' },
+  { category: 'Dining Out', spent: 210, limit: 200, color: '#8b5e52' },
 ]
 
 const s = {
   page: { display: 'flex', flexDirection: 'column', gap: 24 },
-  heading: { fontSize: 24, fontWeight: 700, color: '#1e2a4a', marginBottom: 4 },
-  sub: { fontSize: 14, color: '#64748b' },
+  heading: { fontSize: 26, fontWeight: 700, fontStyle: 'italic', color: '#0e1c4f', marginBottom: 4 },
+  sub: { fontSize: 14, color: '#bba591' },
   grid4: { display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 },
   grid2: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 },
   card: {
     background: '#fff',
     borderRadius: 12,
     padding: 20,
-    boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
+    boxShadow: '0 1px 6px rgba(14,28,79,0.07)',
   },
-  cardTitle: { fontSize: 13, color: '#64748b', fontWeight: 500, marginBottom: 8 },
-  statValue: { fontSize: 28, fontWeight: 700, color: '#1e2a4a' },
+  cardTitle: { fontSize: 13, color: '#bba591', fontWeight: 500, marginBottom: 8, letterSpacing: '0.04em' },
+  statValue: { fontSize: 28, fontWeight: 700, color: '#0e1c4f' },
   trend: (positive) => ({
     fontSize: 12,
-    color: positive ? '#40c057' : '#fa5252',
+    color: positive ? '#336659' : '#8b5e52',
     marginTop: 4,
   }),
-  sectionTitle: { fontSize: 16, fontWeight: 600, color: '#1e2a4a', marginBottom: 16 },
+  sectionTitle: { fontSize: 16, fontWeight: 600, fontStyle: 'italic', color: '#0e1c4f', marginBottom: 16 },
   progressTrack: {
-    background: '#e2e8f0',
+    background: '#f3efe8',
     borderRadius: 999,
     height: 8,
     marginTop: 8,
@@ -75,23 +75,24 @@ const s = {
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: '10px 0',
-    borderBottom: '1px solid #f1f5f9',
+    borderBottom: '1px solid #f3efe8',
   },
-  txDesc: { fontSize: 14, fontWeight: 500, color: '#1e2a4a' },
-  txCat: { fontSize: 12, color: '#94a3b8' },
-  txDate: { fontSize: 12, color: '#94a3b8', marginRight: 16 },
+  txDesc: { fontSize: 14, fontWeight: 500, color: '#0e1c4f' },
+  txCat: { fontSize: 12, color: '#bba591' },
+  txDate: { fontSize: 12, color: '#bba591', marginRight: 16 },
   txAmt: (positive) => ({
     fontSize: 14,
     fontWeight: 600,
-    color: positive ? '#40c057' : '#fa5252',
+    color: positive ? '#336659' : '#8b5e52',
   }),
   viewAll: {
     display: 'block',
     textAlign: 'center',
     marginTop: 12,
     fontSize: 14,
-    color: '#3b5bdb',
+    color: '#336659',
     fontWeight: 500,
+    fontStyle: 'italic',
   },
   alertRow: {
     marginBottom: 12,
@@ -159,7 +160,7 @@ export default function Dashboard() {
                 style={{
                   width: `${savingsGoalPct}%`,
                   height: '100%',
-                  background: '#3b5bdb',
+                  background: '#336659',
                   borderRadius: 999,
                 }}
               />
@@ -184,8 +185,8 @@ export default function Dashboard() {
               <YAxis tick={{ fontSize: 12 }} />
               <Tooltip formatter={(v) => `$${v.toLocaleString()}`} />
               <Legend />
-              <Bar dataKey="income" fill="#40c057" name="Income" radius={[3, 3, 0, 0]} />
-              <Bar dataKey="expenses" fill="#fa5252" name="Expenses" radius={[3, 3, 0, 0]} />
+              <Bar dataKey="income" fill="#336659" name="Income" radius={[3, 3, 0, 0]} />
+              <Bar dataKey="expenses" fill="#bba591" name="Expenses" radius={[3, 3, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>

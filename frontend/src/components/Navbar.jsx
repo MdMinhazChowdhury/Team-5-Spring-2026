@@ -23,7 +23,7 @@ const styles = {
   sidebar: {
     width: 240,
     minWidth: 240,
-    background: '#1e2a4a',
+    background: '#0e1c4f',
     display: 'flex',
     flexDirection: 'column',
     padding: '24px 0',
@@ -32,14 +32,15 @@ const styles = {
     height: '100vh',
   },
   brand: {
-    color: '#fff',
+    color: '#f3efe8',
     fontSize: 20,
     fontWeight: 700,
     padding: '0 24px 32px',
-    letterSpacing: '-0.3px',
+    letterSpacing: '0.3px',
+    fontStyle: 'italic',
   },
   brandAccent: {
-    color: '#f59e0b',
+    color: '#faecc3',
   },
   nav: {
     flex: 1,
@@ -54,18 +55,18 @@ const styles = {
     gap: 12,
     padding: '10px 12px',
     borderRadius: 8,
-    color: '#94a3b8',
+    color: '#bba591',
     fontSize: 15,
     fontWeight: 500,
     transition: 'background 0.15s, color 0.15s',
   },
   navLinkActive: {
-    background: '#f59e0b',
-    color: '#1e2a4a',
+    background: '#faecc3',
+    color: '#0e1c4f',
   },
   userSection: {
     padding: '16px 24px',
-    borderTop: '1px solid rgba(255,255,255,0.1)',
+    borderTop: '1px solid rgba(255,255,255,0.08)',
     display: 'flex',
     alignItems: 'center',
     gap: 12,
@@ -81,20 +82,20 @@ const styles = {
     width: 36,
     height: 36,
     borderRadius: '50%',
-    background: '#3b5bdb',
+    background: '#336659',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    color: '#fff',
+    color: '#f3efe8',
     flexShrink: 0,
   },
   userName: {
-    color: '#fff',
+    color: '#f3efe8',
     fontSize: 14,
     fontWeight: 600,
   },
   userEmail: {
-    color: '#94a3b8',
+    color: '#bba591',
     fontSize: 12,
   },
 }
@@ -145,7 +146,7 @@ export default function Navbar() {
         <button
           style={styles.userSection}
           onClick={() => setShowEditModal(true)}
-          onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.05)')}
+          onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(250,236,195,0.08)')}
           onMouseLeave={(e) => (e.currentTarget.style.background = 'none')}
         >
           <div style={styles.avatar}>

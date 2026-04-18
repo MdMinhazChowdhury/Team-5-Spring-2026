@@ -8,7 +8,7 @@ function Layout() {
   return (
     <div style={{ display: 'flex', minHeight: '100vh', width: '100%' }}>
       <Navbar />
-      <main style={{ flex: 1, padding: 32, overflowY: 'auto' }}>
+      <main style={{ flex: 1, padding: 32, overflowY: 'auto', background: '#f3efe8' }}>
         <Outlet />
       </main>
     </div>
