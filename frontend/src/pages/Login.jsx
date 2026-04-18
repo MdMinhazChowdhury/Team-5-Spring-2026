@@ -29,6 +29,7 @@ const s = {
   subtitle: {
     fontSize: 14,
     color: '#8c7260',
+    fontWeight: 600,
     textAlign: 'center',
     marginBottom: 32,
   },
@@ -84,6 +85,7 @@ const s = {
     textAlign: 'center',
     fontSize: 14,
     color: '#8c7260',
+    fontWeight: 600,
   },
   toggleLink: {
     color: '#336659',

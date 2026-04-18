@@ -56,7 +56,7 @@ const styles = {
     borderRadius: 8,
     color: '#8c7260',
     fontSize: 15,
-    fontWeight: 500,
+    fontWeight: 600,
     transition: 'background 0.15s, color 0.15s',
   },
   navLinkActive: {
@@ -96,6 +96,7 @@ const styles = {
   userEmail: {
     color: '#8c7260',
     fontSize: 12,
+    fontWeight: 600,
   },
 }
 

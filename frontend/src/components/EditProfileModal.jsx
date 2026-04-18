@@ -48,7 +48,7 @@ const s = {
   },
   sectionTitle: {
     fontSize: 14,
-    fontWeight: 600,
+    fontWeight: 700,
     color: '#8c7260',
     marginBottom: 16,
     paddingBottom: 8,
@@ -133,6 +133,7 @@ const s = {
   accountBalance: {
     fontSize: 13,
     color: '#8c7260',
+    fontWeight: 600,
     marginTop: 2,
   },
   deleteBtn: {
@@ -187,6 +188,7 @@ const s = {
   emptyAccounts: {
     fontSize: 14,
     color: '#8c7260',
+    fontWeight: 600,
     textAlign: 'center',
     padding: '16px 0',
   },
