@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import {
   BarChart,
@@ -10,6 +11,7 @@ import {
   ResponsiveContainer,
 } from 'recharts'
 import SpendingChart from '../components/SpendingChart'
+import { userApi } from '../services/api'
 
 const SPENDING_DATA = [
   { name: 'Rent', value: 1500, color: '#3b5bdb' },
@@ -115,12 +117,17 @@ function StatCard({ title, value, trend, trendPositive, extra }) {
 
 export default function Dashboard() {
   const savingsGoalPct = Math.round((1240 / 5000) * 100)
+  const [firstName, setFirstName] = useState('')
+
+  useEffect(() => {
+    userApi.getProfile().then((u) => setFirstName(u.first_name)).catch(() => {})
+  }, [])
 
   return (
     <div style={s.page}>
       <div>
         <div style={s.heading}>Dashboard</div>
-        <div style={s.sub}>Welcome back, John. Here's your financial overview.</div>
+        <div style={s.sub}>Welcome back{firstName ? `, ${firstName}` : ''}. Here's your financial overview.</div>
       </div>
 
       {/* Stat cards */}
