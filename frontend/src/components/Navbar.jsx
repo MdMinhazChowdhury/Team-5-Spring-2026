@@ -54,7 +54,7 @@ const styles = {
     gap: 12,
     padding: '10px 12px',
     borderRadius: 8,
-    color: '#8c7260',
+    color: '#c9b8ab',
     fontSize: 15,
     fontWeight: 600,
     transition: 'background 0.15s, color 0.15s',
