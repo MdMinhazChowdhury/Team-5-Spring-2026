@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import {
   BarChart,
@@ -10,14 +11,23 @@ import {
   ResponsiveContainer,
 } from 'recharts'
 import SpendingChart from '../components/SpendingChart'
+import { userApi, accountsApi, transactionApi } from '../services/api'
+
+// Set to true to use hardcoded mock data instead of live API calls
+const USE_MOCK_DATA = true
+
+const MOCK_ACCOUNTS = [
+  { account_id: 1, account_type_name: 'Checking', account_balance: 3200.50 },
+  { account_id: 2, account_type_name: 'Savings', account_balance: 9640.00 },
+]
 
 const SPENDING_DATA = [
-  { name: 'Rent', value: 1500, color: '#3b5bdb' },
-  { name: 'Groceries', value: 580, color: '#40c057' },
-  { name: 'Transport', value: 220, color: '#f59e0b' },
-  { name: 'Utilities', value: 180, color: '#fa5252' },
-  { name: 'Entertainment', value: 120, color: '#be4bdb' },
-  { name: 'Other', value: 200, color: '#74c0fc' },
+  { name: 'Rent', value: 1500, color: '#0e1c4f' },
+  { name: 'Groceries', value: 580, color: '#336659' },
+  { name: 'Transport', value: 220, color: '#bba591' },
+  { name: 'Utilities', value: 180, color: '#8b5e52' },
+  { name: 'Entertainment', value: 120, color: '#6b8f86' },
+  { name: 'Other', value: 200, color: '#c9a882' },
 ]
 
 const BAR_DATA = [
@@ -38,32 +48,67 @@ const RECENT_TRANSACTIONS = [
 ]
 
 const BUDGET_ALERTS = [
-  { category: 'Entertainment', spent: 120, limit: 150, color: '#f59e0b' },
-  { category: 'Dining Out', spent: 210, limit: 200, color: '#fa5252' },
+  { category: 'Entertainment', spent: 120, limit: 150, color: '#336659' },
+  { category: 'Dining Out', spent: 210, limit: 200, color: '#dc2626' },
 ]
 
 const s = {
   page: { display: 'flex', flexDirection: 'column', gap: 24 },
-  heading: { fontSize: 24, fontWeight: 700, color: '#1e2a4a', marginBottom: 4 },
-  sub: { fontSize: 14, color: '#64748b' },
+  heading: { fontSize: 26, fontWeight: 700, color: '#0e1c4f', marginBottom: 4 },
+  sub: { fontSize: 14, color: '#8c7260', fontWeight: 600 },
+  accountsRow: {
+    display: 'flex',
+    gap: 12,
+    overflowX: 'auto',
+    paddingBottom: 4,
+  },
+  accountCard: {
+    background: '#fff',
+    borderRadius: 12,
+    padding: '16px 20px',
+    boxShadow: '0 1px 6px rgba(14,28,79,0.07)',
+    minWidth: 160,
+    flexShrink: 0,
+  },
+  accountType: {
+    fontSize: 13,
+    color: '#8c7260',
+    fontWeight: 600,
+    marginBottom: 8,
+    letterSpacing: '0.04em',
+  },
+  accountBalance: {
+    fontSize: 22,
+    fontWeight: 700,
+    color: '#0e1c4f',
+  },
+  emptyAccounts: {
+    fontSize: 14,
+    color: '#8c7260',
+    fontWeight: 600,
+    padding: '16px 20px',
+    background: '#fff',
+    borderRadius: 12,
+    boxShadow: '0 1px 6px rgba(14,28,79,0.07)',
+  },
   grid4: { display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 },
   grid2: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 },
   card: {
     background: '#fff',
     borderRadius: 12,
     padding: 20,
-    boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
+    boxShadow: '0 1px 6px rgba(14,28,79,0.07)',
   },
-  cardTitle: { fontSize: 13, color: '#64748b', fontWeight: 500, marginBottom: 8 },
-  statValue: { fontSize: 28, fontWeight: 700, color: '#1e2a4a' },
+  cardTitle: { fontSize: 13, color: '#8c7260', fontWeight: 600, marginBottom: 8, letterSpacing: '0.04em' },
+  statValue: { fontSize: 28, fontWeight: 700, color: '#0e1c4f' },
   trend: (positive) => ({
     fontSize: 12,
-    color: positive ? '#40c057' : '#fa5252',
+    color: positive === undefined ? '#8c7260' : positive ? '#16a34a' : '#dc2626',
     marginTop: 4,
   }),
-  sectionTitle: { fontSize: 16, fontWeight: 600, color: '#1e2a4a', marginBottom: 16 },
+  sectionTitle: { fontSize: 16, fontWeight: 600, color: '#0e1c4f', marginBottom: 16 },
   progressTrack: {
-    background: '#e2e8f0',
+    background: '#f3efe8',
     borderRadius: 999,
     height: 8,
     marginTop: 8,
@@ -73,22 +118,22 @@ const s = {
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: '10px 0',
-    borderBottom: '1px solid #f1f5f9',
+    borderBottom: '1px solid #f3efe8',
   },
-  txDesc: { fontSize: 14, fontWeight: 500, color: '#1e2a4a' },
-  txCat: { fontSize: 12, color: '#94a3b8' },
-  txDate: { fontSize: 12, color: '#94a3b8', marginRight: 16 },
+  txDesc: { fontSize: 14, fontWeight: 500, color: '#0e1c4f' },
+  txCat: { fontSize: 12, color: '#8c7260', fontWeight: 600 },
+  txDate: { fontSize: 12, color: '#8c7260', fontWeight: 600, marginRight: 16 },
   txAmt: (positive) => ({
     fontSize: 14,
     fontWeight: 600,
-    color: positive ? '#40c057' : '#fa5252',
+    color: positive ? '#16a34a' : '#dc2626',
   }),
   viewAll: {
     display: 'block',
     textAlign: 'center',
     marginTop: 12,
     fontSize: 14,
-    color: '#3b5bdb',
+    color: '#336659',
     fontWeight: 500,
   },
   alertRow: {
@@ -113,33 +158,77 @@ function StatCard({ title, value, trend, trendPositive, extra }) {
   )
 }
 
+function fmt(value) {
+  if (value === null) return '...'
+  return `$${Number(value).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+}
+
 export default function Dashboard() {
   const savingsGoalPct = Math.round((1240 / 5000) * 100)
+  const [firstName, setFirstName] = useState('')
+  const [accounts, setAccounts] = useState(USE_MOCK_DATA ? MOCK_ACCOUNTS : [])
+  const [totalBalance, setTotalBalance] = useState(USE_MOCK_DATA ? 12840.50 : null)
+  const [monthlyIncome, setMonthlyIncome] = useState(USE_MOCK_DATA ? 4200.00 : null)
+  const [monthlyExpenses, setMonthlyExpenses] = useState(USE_MOCK_DATA ? 2800.21 : null)
+
+  useEffect(() => {
+    userApi.getProfile().then((u) => setFirstName(u.first_name)).catch(() => {})
+
+    if (!USE_MOCK_DATA) {
+      const now = new Date()
+      const year = now.getFullYear()
+      const month = now.getMonth() + 1
+
+      Promise.all([
+        accountsApi.getAll(),
+        transactionApi.getMonthlyIncome(year, month),
+        transactionApi.getMonthlySpending(year, month),
+      ]).then(([accts, income, expenses]) => {
+        setAccounts(accts)
+        setTotalBalance(accts.reduce((sum, a) => sum + a.account_balance, 0))
+        setMonthlyIncome(income.total)
+        setMonthlyExpenses(expenses.total)
+      }).catch(() => {})
+    }
+  }, [])
 
   return (
     <div style={s.page}>
       <div>
         <div style={s.heading}>Dashboard</div>
-        <div style={s.sub}>Welcome back, John. Here's your financial overview.</div>
+        <div style={s.sub}>Welcome back{firstName ? `, ${firstName}` : ''}. Here's your financial overview.</div>
+      </div>
+
+      {/* Account cards */}
+      <div style={s.accountsRow}>
+        {accounts.length === 0 ? (
+          <div style={s.emptyAccounts}>No accounts linked — add one in your profile.</div>
+        ) : (
+          accounts.map((acct) => (
+            <div key={acct.account_id} style={s.accountCard}>
+              <div style={s.accountType}>{acct.account_type_name}</div>
+              <div style={s.accountBalance}>{fmt(acct.account_balance)}</div>
+            </div>
+          ))
+        )}
       </div>
 
       {/* Stat cards */}
       <div style={s.grid4}>
         <StatCard
           title="Total Balance"
-          value="$12,840.50"
-          trend="▲ 2.4% from last month"
-          trendPositive={true}
+          value={fmt(totalBalance)}
+          trend="Across all accounts"
         />
         <StatCard
           title="Monthly Income"
-          value="$4,200.00"
+          value={fmt(monthlyIncome)}
           trend="▲ Stable"
           trendPositive={true}
         />
         <StatCard
           title="Monthly Expenses"
-          value="$2,800.21"
+          value={fmt(monthlyExpenses)}
           trend="▼ 5.1% from last month"
           trendPositive={true}
         />
@@ -152,7 +241,7 @@ export default function Dashboard() {
                 style={{
                   width: `${savingsGoalPct}%`,
                   height: '100%',
-                  background: '#3b5bdb',
+                  background: '#336659',
                   borderRadius: 999,
                 }}
               />
@@ -177,8 +266,8 @@ export default function Dashboard() {
               <YAxis tick={{ fontSize: 12 }} />
               <Tooltip formatter={(v) => `$${v.toLocaleString()}`} />
               <Legend />
-              <Bar dataKey="income" fill="#40c057" name="Income" radius={[3, 3, 0, 0]} />
-              <Bar dataKey="expenses" fill="#fa5252" name="Expenses" radius={[3, 3, 0, 0]} />
+              <Bar dataKey="income" fill="#16a34a" name="Income" radius={[3, 3, 0, 0]} />
+              <Bar dataKey="expenses" fill="#dc2626" name="Expenses" radius={[3, 3, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
