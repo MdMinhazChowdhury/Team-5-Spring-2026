@@ -5,9 +5,9 @@
 }
 
 body {
-  font-family: 'Optima', 'Gill Sans', 'Segoe UI', Tahoma, sans-serif;
-  background: #f3efe8;
-  color: #0e1c4f;
+  font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
+  background: #f0f2f5;
+  color: #1e2a4a;
   -webkit-font-smoothing: antialiased;
 }
 

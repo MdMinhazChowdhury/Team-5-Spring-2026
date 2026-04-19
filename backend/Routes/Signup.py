@@ -30,7 +30,6 @@ def signup(request: SignupRequest):
 
         return{
             "message": "Signup successful", #Success confirmation message returned to the client.
-            "access_token": response.session.access_token, #Returns the session token for auto-login.
             "email": response.user.email.lower(), #Returns the user's email.
             "first_name": request.first_name, #Returns the user's first name.
             "last_name": request.last_name #Returns the user's last name.
