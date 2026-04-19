@@ -60,7 +60,11 @@ def update_current_user(request: UpdateUserRequest, token: str = Depends(verify_
         )
 
         if not response.is_success:
-            raise HTTPException(status_code=response.status_code, detail=response.json().get("message", "Update failed"))
+            try:
+                detail = response.json().get("message", "Update failed")
+            except Exception:
+                detail = response.text or "Update failed"
+            raise HTTPException(status_code=response.status_code, detail=detail)
 
         return {"message": "Profile updated successfully"}
 
