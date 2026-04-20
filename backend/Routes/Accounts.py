@@ -39,24 +39,20 @@ def get_accounts(token: str = Depends(verify_token)):
 @router.post("/accounts") #Creates a new account for the authenticated user
 def create_account(request: AccountCreate, token: str = Depends(verify_token)):
     try:
-        user = supabase.auth.get_user(token)
-        user_id = user.user.id
-
         if request.account_type_id not in ACCOUNT_TYPES:
             raise HTTPException(status_code=400, detail="Invalid account type. Use 1 for Checking or 2 for Savings.")
 
-        response = supabase.table("Account").insert({
-            "AccountBalance": request.account_balance,
-            "AccountTypeID": request.account_type_id,
-            "UserID": user_id,
+        result = supabase.postgrest.auth(token).rpc("create_account", {
+            "initial_balance": request.account_balance,
+            "account_type_id": request.account_type_id,
         }).execute()
+        new_id = result.data
 
-        row = response.data[0]
         return {
-            "account_id": row["AccountID"],
-            "account_balance": row["AccountBalance"],
-            "account_type_id": row["AccountTypeID"],
-            "account_type_name": ACCOUNT_TYPES.get(row["AccountTypeID"], "Unknown"),
+            "account_id": new_id,
+            "account_balance": request.account_balance,
+            "account_type_id": request.account_type_id,
+            "account_type_name": ACCOUNT_TYPES.get(request.account_type_id, "Unknown"),
         }
 
     except HTTPException:
@@ -68,15 +64,9 @@ def create_account(request: AccountCreate, token: str = Depends(verify_token)):
 @router.delete("/accounts/{account_id}") #Deletes an account owned by the authenticated user
 def delete_account(account_id: int, token: str = Depends(verify_token)):
     try:
-        user = supabase.auth.get_user(token)
-        user_id = user.user.id
-
-        # Verify ownership before deleting
-        existing = supabase.table("Account").select("AccountID").eq("AccountID", account_id).eq("UserID", user_id).execute()
-        if not existing.data:
-            raise HTTPException(status_code=404, detail="Account not found or access denied.")
-
-        supabase.table("Account").delete().eq("AccountID", account_id).execute()
+        supabase.postgrest.auth(token).rpc("delete_account", {
+            "account_id": account_id,
+        }).execute()
 
         return {"message": "Account deleted successfully"}
 

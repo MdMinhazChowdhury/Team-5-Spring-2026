@@ -49,7 +49,7 @@ def update_current_user(request: UpdateUserRequest, token: str = Depends(verify_
         if metadata_update:
             update_data["data"] = metadata_update
 
-        response = httpx.patch(
+        response = httpx.put(
             f"{URL}/auth/v1/user",
             headers={
                 "Authorization": f"Bearer {token}",
