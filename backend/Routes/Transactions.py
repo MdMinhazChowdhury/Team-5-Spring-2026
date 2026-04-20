@@ -13,6 +13,7 @@ class CreateTransactionRequest(BaseModel):
     amount: float
     category_id: int
     date_of_transaction: date
+    description: Optional[str] = None
 
 
 class UpdateTransactionRequest(BaseModel):
@@ -20,6 +21,7 @@ class UpdateTransactionRequest(BaseModel):
     category_id: int
     account_id: int
     date: date
+    description: Optional[str] = None
 
 
 @router.get("/transactions")
@@ -34,7 +36,7 @@ def get_transactions(account_id: Optional[int] = None, limit: int = 50, token: s
 def create_transaction(request: CreateTransactionRequest, token: str = Depends(verify_token)):
     try:
         new_id = transaction_service.create_transaction(
-            token, request.account_id, request.amount, request.category_id, request.date_of_transaction
+            token, request.account_id, request.amount, request.category_id, request.date_of_transaction, request.description
         )
         return {"transaction_id": new_id}
     except Exception as e:
@@ -45,7 +47,7 @@ def create_transaction(request: CreateTransactionRequest, token: str = Depends(v
 def update_transaction(transaction_id: int, request: UpdateTransactionRequest, token: str = Depends(verify_token)):
     try:
         transaction_service.update_transaction(
-            token, transaction_id, request.amount, request.category_id, request.account_id, request.date
+            token, transaction_id, request.amount, request.category_id, request.account_id, request.date, request.description
         )
         return {"message": "Transaction updated"}
     except Exception as e:
@@ -89,5 +91,13 @@ def get_monthly_spending(year: int, month: int, token: str = Depends(verify_toke
 def get_monthly_income(year: int, month: int, token: str = Depends(verify_token)):
     try:
         return {"total": transaction_service.get_monthly_income(token, year, month)}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.get("/categories")
+def get_categories(token: str = Depends(verify_token)):
+    try:
+        return transaction_service.get_categories(token)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))

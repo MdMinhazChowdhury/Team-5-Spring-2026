@@ -8,22 +8,24 @@ def get_transactions(token, account_id=None, limit=50):
     return client.rpc("get_recent_transactions", {"limit_count": limit}).execute().data
 
 
-def create_transaction(token, account_id, amount, category_id, date_of_transaction):
+def create_transaction(token, account_id, amount, category_id, date_of_transaction, description=None):
     return supabase.postgrest.auth(token).rpc("create_transaction", {
         "account_id": account_id,
         "amount": amount,
         "category_id": category_id,
         "date_of_transaction": str(date_of_transaction),
+        "description": description,
     }).execute().data
 
 
-def update_transaction(token, transaction_id, amount, category_id, account_id, date):
+def update_transaction(token, transaction_id, amount, category_id, account_id, date, description=None):
     supabase.postgrest.auth(token).rpc("update_transaction", {
         "transaction_id": transaction_id,
         "amount": amount,
         "category_id": category_id,
         "account_id": account_id,
         "date": str(date),
+        "description": description,
     }).execute()
 
 
@@ -59,6 +61,10 @@ def get_monthly_income(token, year, month):
         "year": year,
         "month": month,
     }).execute().data
+
+
+def get_categories(token):
+    return supabase.postgrest.auth(token).rpc("get_categories", {}).execute().data
 
 
 def get_user_summary(token):
