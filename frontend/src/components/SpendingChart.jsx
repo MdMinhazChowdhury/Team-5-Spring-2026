@@ -1,0 +1,25 @@
+import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts'
+
+export default function SpendingChart({ data }) {
+  return (
+    <ResponsiveContainer width="100%" height={260}>
+      <PieChart>
+        <Pie
+          data={data}
+          cx="50%"
+          cy="50%"
+          innerRadius={60}
+          outerRadius={100}
+          paddingAngle={3}
+          dataKey="value"
+        >
+          {data.map((entry, index) => (
+            <Cell key={index} fill={entry.color} />
+          ))}
+        </Pie>
+        <Tooltip formatter={(value) => `$${value.toLocaleString()}`} />
+        <Legend />
+      </PieChart>
+    </ResponsiveContainer>
+  )
+}
