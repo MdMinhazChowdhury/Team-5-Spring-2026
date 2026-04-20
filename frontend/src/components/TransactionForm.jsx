@@ -131,7 +131,7 @@ export default function TransactionForm({ onClose, onSave, transaction, accounts
               <select style={s.input} name="account_id" value={form.account_id} onChange={handleChange} required>
                 <option value="">Select account</option>
                 {accounts.map((a) => (
-                  <option key={a.AccountID} value={a.AccountID}>{a.Account_Name}</option>
+                  <option key={a.account_id} value={a.account_id}>{a.account_type_name}</option>
                 ))}
               </select>
             </div>
