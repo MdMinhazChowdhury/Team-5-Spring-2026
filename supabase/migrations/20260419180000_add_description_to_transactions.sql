@@ -64,6 +64,12 @@ CREATE OR REPLACE FUNCTION "public"."update_transaction"(
     and "UserID" = auth.uid();
 $$;
 
+-- Drop functions whose return type is changing before recreating them
+DROP FUNCTION IF EXISTS "public"."get_recent_transactions"(integer);
+DROP FUNCTION IF EXISTS "public"."get_transactions"(integer);
+DROP FUNCTION IF EXISTS "public"."get_transactions_by_date"("date", "date");
+DROP FUNCTION IF EXISTS "public"."get_transaction_by_id"(integer);
+
 -- Update get_recent_transactions to return Description
 CREATE OR REPLACE FUNCTION "public"."get_recent_transactions"("limit_count" integer)
 RETURNS TABLE(
