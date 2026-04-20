@@ -10,7 +10,7 @@ beforeEach(() => {
 
 describe('transactionApi', () => {
   it('getAll sends GET to /transactions', async () => {
-    fetch.mockResolvedValue({ json: async () => [] })
+    fetch.mockResolvedValue({ ok: true, json: async () => [] })
     await transactionApi.getAll()
     expect(fetch).toHaveBeenCalledWith(
       `${BASE_URL}/transactions`,
@@ -20,7 +20,7 @@ describe('transactionApi', () => {
 
   it('create sends POST to /transactions with body', async () => {
     const txData = { description: 'Test', amount: 100 }
-    fetch.mockResolvedValue({ json: async () => ({ id: 1, ...txData }) })
+    fetch.mockResolvedValue({ ok: true, json: async () => ({ id: 1, ...txData }) })
     await transactionApi.create(txData)
     expect(fetch).toHaveBeenCalledWith(
       `${BASE_URL}/transactions`,
@@ -29,7 +29,7 @@ describe('transactionApi', () => {
   })
 
   it('update sends PUT to /transactions/:id', async () => {
-    fetch.mockResolvedValue({ json: async () => ({}) })
+    fetch.mockResolvedValue({ ok: true, json: async () => ({}) })
     await transactionApi.update(42, { amount: 200 })
     expect(fetch).toHaveBeenCalledWith(
       `${BASE_URL}/transactions/42`,
@@ -38,7 +38,7 @@ describe('transactionApi', () => {
   })
 
   it('delete sends DELETE to /transactions/:id', async () => {
-    fetch.mockResolvedValue({})
+    fetch.mockResolvedValue({ ok: true, json: async () => ({}) })
     await transactionApi.delete(42)
     expect(fetch).toHaveBeenCalledWith(
       `${BASE_URL}/transactions/42`,
