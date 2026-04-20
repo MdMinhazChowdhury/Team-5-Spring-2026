@@ -43,60 +43,71 @@ export default function TransactionForm({ onClose, onSave, transaction, accounts
     }
   }
 
-  const overlay = {
-    position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
-    display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000,
-  }
-  const modal = {
-    background: '#fff', borderRadius: 12, width: 480, maxWidth: '95vw',
-    boxShadow: '0 8px 32px rgba(0,0,0,0.2)', overflow: 'hidden',
-  }
-  const header = {
-    background: '#1e2a4a', color: '#fff', padding: '16px 24px',
-    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-  }
-  const body = { padding: 24 }
-  const fieldStyle = { marginBottom: 16 }
-  const labelStyle = { display: 'block', marginBottom: 4, fontSize: 13, color: '#555', fontWeight: 600 }
-  const inputStyle = {
-    width: '100%', padding: '8px 12px', borderRadius: 6, border: '1px solid #ddd',
-    fontSize: 14, boxSizing: 'border-box',
-  }
-  const footer = { display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 8 }
-  const btnSecondary = {
-    padding: '8px 18px', borderRadius: 6, border: '1px solid #ddd',
-    background: '#fff', cursor: 'pointer', fontSize: 14,
-  }
-  const btnPrimary = {
-    padding: '8px 18px', borderRadius: 6, border: 'none',
-    background: '#f59e0b', color: '#fff', cursor: 'pointer', fontSize: 14, fontWeight: 600,
+  const s = {
+    overlay: {
+      position: 'fixed', inset: 0, background: 'rgba(14,28,79,0.35)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000,
+    },
+    modal: {
+      background: '#fff', borderRadius: 16, width: 480, maxWidth: '95vw',
+      boxShadow: '0 8px 40px rgba(14,28,79,0.18)', overflow: 'hidden',
+    },
+    header: {
+      background: '#0e1c4f', color: '#f3efe8', padding: '16px 24px',
+      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+    },
+    headerTitle: { fontWeight: 700, fontSize: 16 },
+    closeBtn: {
+      background: 'none', border: 'none', color: '#f3efe8',
+      fontSize: 22, cursor: 'pointer', lineHeight: 1, padding: 0,
+    },
+    body: { padding: 24 },
+    field: { marginBottom: 18 },
+    label: { display: 'block', marginBottom: 6, fontSize: 13, color: '#0e1c4f', fontWeight: 600 },
+    input: {
+      width: '100%', padding: '10px 14px', borderRadius: 8, border: '1px solid #8c7260',
+      fontSize: 14, boxSizing: 'border-box', background: '#fdf9f4',
+      color: '#0e1c4f', fontFamily: 'inherit', outline: 'none',
+    },
+    error: {
+      background: '#fee2e2', color: '#b91c1c', borderRadius: 8,
+      padding: '10px 14px', fontSize: 14, marginBottom: 16,
+    },
+    footer: { display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 8 },
+    cancelBtn: {
+      padding: '10px 18px', borderRadius: 8, border: '1px solid #8c7260',
+      background: '#fff', cursor: 'pointer', fontSize: 14, fontFamily: 'inherit', color: '#0e1c4f',
+    },
+    saveBtn: {
+      padding: '10px 18px', borderRadius: 8, border: 'none',
+      background: '#336659', color: '#f3efe8', cursor: 'pointer',
+      fontSize: 14, fontWeight: 600, fontFamily: 'inherit',
+    },
   }
 
   return (
-    <div style={overlay} onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <div style={modal}>
-        <div style={header}>
-          <span style={{ fontWeight: 700, fontSize: 16 }}>
-            {isEdit ? 'Edit Transaction' : 'Add Transaction'}
-          </span>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#fff', fontSize: 20, cursor: 'pointer' }}>x</button>
+    <div style={s.overlay} onClick={(e) => e.target === e.currentTarget && onClose()}>
+      <div style={s.modal}>
+        <div style={s.header}>
+          <span style={s.headerTitle}>{isEdit ? 'Edit Transaction' : 'Add Transaction'}</span>
+          <button onClick={onClose} style={s.closeBtn}>x</button>
         </div>
-        <div style={body}>
+        <div style={s.body}>
           <form onSubmit={handleSubmit}>
-            <div style={fieldStyle}>
-              <label style={labelStyle}>Description</label>
+            <div style={s.field}>
+              <label style={s.label}>Description</label>
               <input
-                style={inputStyle}
+                style={s.input}
                 name="description"
                 value={form.description}
                 onChange={handleChange}
                 placeholder="e.g. Grocery run"
               />
             </div>
-            <div style={fieldStyle}>
-              <label style={labelStyle}>Amount (positive = income, negative = expense)</label>
+            <div style={s.field}>
+              <label style={s.label}>Amount (positive = income, negative = expense)</label>
               <input
-                style={inputStyle}
+                style={s.input}
                 name="amount"
                 type="number"
                 step="0.01"
@@ -106,28 +117,28 @@ export default function TransactionForm({ onClose, onSave, transaction, accounts
                 placeholder="e.g. -45.00"
               />
             </div>
-            <div style={fieldStyle}>
-              <label style={labelStyle}>Category</label>
-              <select style={inputStyle} name="category_id" value={form.category_id} onChange={handleChange} required>
+            <div style={s.field}>
+              <label style={s.label}>Category</label>
+              <select style={s.input} name="category_id" value={form.category_id} onChange={handleChange} required>
                 <option value="">Select category</option>
                 {categories.map((c) => (
                   <option key={c.CategoryID} value={c.CategoryID}>{c.Category_Title}</option>
                 ))}
               </select>
             </div>
-            <div style={fieldStyle}>
-              <label style={labelStyle}>Account</label>
-              <select style={inputStyle} name="account_id" value={form.account_id} onChange={handleChange} required>
+            <div style={s.field}>
+              <label style={s.label}>Account</label>
+              <select style={s.input} name="account_id" value={form.account_id} onChange={handleChange} required>
                 <option value="">Select account</option>
                 {accounts.map((a) => (
                   <option key={a.AccountID} value={a.AccountID}>{a.Account_Name}</option>
                 ))}
               </select>
             </div>
-            <div style={fieldStyle}>
-              <label style={labelStyle}>Date</label>
+            <div style={s.field}>
+              <label style={s.label}>Date</label>
               <input
-                style={inputStyle}
+                style={s.input}
                 name="date_of_transaction"
                 type="date"
                 value={form.date_of_transaction}
@@ -135,12 +146,10 @@ export default function TransactionForm({ onClose, onSave, transaction, accounts
                 required
               />
             </div>
-            {error && (
-              <p style={{ color: '#dc2626', fontSize: 13, marginBottom: 12 }}>{error}</p>
-            )}
-            <div style={footer}>
-              <button type="button" style={btnSecondary} onClick={onClose}>Cancel</button>
-              <button type="submit" style={btnPrimary} disabled={saving}>
+            {error && <div style={s.error}>{error}</div>}
+            <div style={s.footer}>
+              <button type="button" style={s.cancelBtn} onClick={onClose}>Cancel</button>
+              <button type="submit" style={s.saveBtn} disabled={saving}>
                 {saving ? 'Saving...' : isEdit ? 'Save Changes' : 'Add Transaction'}
               </button>
             </div>
