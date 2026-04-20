@@ -10,26 +10,38 @@ function authHeader() {
 
 export const transactionApi = {
   getAll: () =>
-    fetch(`${BASE_URL}/transactions`, { headers: authHeader() }).then((r) => r.json()),
+    fetch(`${BASE_URL}/transactions`, { headers: authHeader() }).then((r) => {
+      if (!r.ok) throw new Error('Failed to load transactions')
+      return r.json()
+    }),
 
   create: (data) =>
     fetch(`${BASE_URL}/transactions`, {
       method: 'POST',
       body: JSON.stringify(data),
       headers: authHeader(),
-    }).then((r) => r.json()),
+    }).then((r) => {
+      if (!r.ok) return r.json().then((d) => { throw new Error(d.detail || 'Failed to create transaction') })
+      return r.json()
+    }),
 
   update: (id, data) =>
     fetch(`${BASE_URL}/transactions/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
       headers: authHeader(),
-    }).then((r) => r.json()),
+    }).then((r) => {
+      if (!r.ok) return r.json().then((d) => { throw new Error(d.detail || 'Failed to update transaction') })
+      return r.json()
+    }),
 
   delete: (id) =>
     fetch(`${BASE_URL}/transactions/${id}`, {
       method: 'DELETE',
       headers: authHeader(),
+    }).then((r) => {
+      if (!r.ok) return r.json().then((d) => { throw new Error(d.detail || 'Failed to delete transaction') })
+      return r.json()
     }),
 
   getMonthlyIncome: (year, month) =>
@@ -79,6 +91,14 @@ export const userApi = {
       headers: authHeader(),
     }).then((r) => {
       if (!r.ok) return r.json().then((d) => { throw new Error(d.detail || 'Update failed') })
+      return r.json()
+    }),
+}
+
+export const categoriesApi = {
+  getAll: () =>
+    fetch(`${BASE_URL}/categories`, { headers: authHeader() }).then((r) => {
+      if (!r.ok) throw new Error('Failed to load categories')
       return r.json()
     }),
 }
