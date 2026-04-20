@@ -14,7 +14,7 @@ import SpendingChart from '../components/SpendingChart'
 import { userApi, accountsApi, transactionApi } from '../services/api'
 
 // Set to true to use hardcoded mock data instead of live API calls
-const USE_MOCK_DATA = true
+const USE_MOCK_DATA = false
 
 const MOCK_ACCOUNTS = [
   { account_id: 1, account_type_name: 'Checking', account_balance: 3200.50 },
@@ -147,11 +147,11 @@ const s = {
   },
 }
 
-function StatCard({ title, value, trend, trendPositive, extra }) {
+function StatCard({ title, value, trend, trendPositive, extra, valueColor }) {
   return (
     <div style={s.card}>
       <div style={s.cardTitle}>{title}</div>
-      <div style={s.statValue}>{value}</div>
+      <div style={{ ...s.statValue, ...(valueColor ? { color: valueColor } : {}) }}>{value}</div>
       {trend && <div style={s.trend(trendPositive)}>{trend}</div>}
       {extra}
     </div>
@@ -187,7 +187,7 @@ export default function Dashboard() {
         setAccounts(accts)
         setTotalBalance(accts.reduce((sum, a) => sum + a.account_balance, 0))
         setMonthlyIncome(income.total)
-        setMonthlyExpenses(expenses.total)
+        setMonthlyExpenses(Math.abs(expenses.total))
       }).catch(() => {})
     }
   }, [])
@@ -225,12 +225,14 @@ export default function Dashboard() {
           value={fmt(monthlyIncome)}
           trend="▲ Stable"
           trendPositive={true}
+          valueColor="#16a34a"
         />
         <StatCard
           title="Monthly Expenses"
           value={fmt(monthlyExpenses)}
           trend="▼ 5.1% from last month"
           trendPositive={true}
+          valueColor="#dc2626"
         />
         <StatCard
           title="Savings Goal"
