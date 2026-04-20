@@ -28,13 +28,6 @@ def signup(request: SignupRequest):
             }
         })
 
-        supabase.table("UserTable").insert({
-            "UserID": response.user.id,
-            "FirstName": request.first_name,
-            "LastName": request.last_name,
-            "Email": request.email.lower(),
-        }).execute()
-
         return{
             "message": "Signup successful", #Success confirmation message returned to the client.
             "access_token": response.session.access_token, #Returns the session token for auto-login.
