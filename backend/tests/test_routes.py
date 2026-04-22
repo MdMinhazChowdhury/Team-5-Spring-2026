@@ -1,11 +1,12 @@
 import pytest #The framework used for testing
+import time
 from fastapi.testclient import TestClient #Simulates HTTP requests without running a server
 from main import app
 
 client = TestClient(app) #Creates a test client for the FastAPI app
 
 #---- Data for testing ----#
-Test_Email = 'testuser@gmail.com'
+Test_Email = f'testuser+{int(time.time())}@gmail.com'
 Test_Password = 'TestPassword123!'
 Test_First_Name = 'Test'
 Test_Last_Name = 'User'
