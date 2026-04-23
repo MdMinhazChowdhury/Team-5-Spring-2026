@@ -33,6 +33,6 @@ describe('Navbar', () => {
       </MemoryRouter>
     )
     const dashLink = screen.getByText('Dashboard').closest('a')
-    expect(dashLink).toHaveStyle({ background: '#f59e0b' })
+    expect(dashLink).toHaveStyle({ background: '#faecc3' })
   })
 })

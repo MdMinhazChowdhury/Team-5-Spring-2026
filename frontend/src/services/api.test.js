@@ -55,7 +55,7 @@ describe('authApi', () => {
     })
     await authApi.login('user@test.com', 'password')
     expect(fetch).toHaveBeenCalledWith(
-      `${BASE_URL}/auth/login`,
+      `${BASE_URL}/login`,
       expect.objectContaining({ method: 'POST' })
     )
   })
