@@ -45,6 +45,29 @@ describe('transactionApi', () => {
       expect.objectContaining({ method: 'DELETE' })
     )
   })
+
+  it('getMonthlyIncome sends GET to /transactions/monthly-income with year and month', async () => {
+    fetch.mockResolvedValue({ ok: true, json: async () => ({ total: 500 }) })
+    await transactionApi.getMonthlyIncome(2026, 4)
+    expect(fetch).toHaveBeenCalledWith(
+      `${BASE_URL}/transactions/monthly-income?year=2026&month=4`,
+      expect.objectContaining({})
+    )
+  })
+
+  it('getMonthlySpending sends GET to /transactions/monthly-spending with year and month', async () => {
+    fetch.mockResolvedValue({ ok: true, json: async () => ({ total: 200 }) })
+    await transactionApi.getMonthlySpending(2026, 4)
+    expect(fetch).toHaveBeenCalledWith(
+      `${BASE_URL}/transactions/monthly-spending?year=2026&month=4`,
+      expect.objectContaining({})
+    )
+  })
+
+  it('getAll throws when response is not ok', async () => {
+    fetch.mockResolvedValue({ ok: false, json: async () => ({}) })
+    await expect(transactionApi.getAll()).rejects.toThrow('Failed to load transactions')
+  })
 })
 
 describe('authApi', () => {
