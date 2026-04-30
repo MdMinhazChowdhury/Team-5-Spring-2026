@@ -35,3 +35,39 @@ def test_get_goal_by_id_not_found():
     result = repo.get_goal_by_id(params["goal_id"])
 
     assert result is None
+
+#RAINY DAY CASE
+
+def test_get_goal_progress_returns_none():
+    stub = DbClientStub()
+    repo = FinanceRepository(stub)
+
+    params = {"goal_id": "abc"}
+    stub.set_fake_result("get_goal_progress", params, None)
+
+    result = repo.get_goal_progress("abc")
+
+    assert result is None
+
+def test_get_financial_goals_wrong_structure():
+    stub = DbClientStub()
+    repo = FinanceRepository(stub)
+
+    params = {}
+    stub.set_fake_result("get_financial_goals", params, {"oops": "bad"})
+
+    result = repo.get_financial_goals()
+
+    assert isinstance(result, dict)
+
+#BOUNDARY CASE
+def test_get_financial_goals_empty():
+    stub = DbClientStub()
+    repo = FinanceRepository(stub)
+
+    params = {}
+    stub.set_fake_result("get_financial_goals", params, [])
+
+    result = repo.get_financial_goals()
+
+    assert result == []
