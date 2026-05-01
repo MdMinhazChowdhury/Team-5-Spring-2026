@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from Routes import Login, Signup, User, Transactions, Dashboard, Accounts, Goals #Imports route files from the Routes Folder
+from Routes import Login, Signup, User, Transactions, Dashboard, Accounts, Goals, Budgets #Imports route files from the Routes Folder
 
 app = FastAPI() #Creates an instance of the FastAPI class
 
@@ -19,3 +19,4 @@ app.include_router(Transactions.router) #Includes the Transactions router
 app.include_router(Dashboard.router) #Includes the Dashboard router
 app.include_router(Accounts.router) #Includes the Accounts router
 app.include_router(Goals.router) # Includes the Goals router
+app.include_router(Budgets.router)#Includes the Budgets router

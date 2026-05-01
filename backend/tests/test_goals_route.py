@@ -5,9 +5,7 @@ created_goal_id = None
 
 # ---- GET /goals tests ---- #
 def test_get_goals_success(client, token): #Token and Client come from conftest.py fixtures
-    response = client.get("/goals", headers= { #Sends a GET request to /goals
-        "Authorization": f"Bearer {token}" #Attach token in header
-    })
+    response = client.get("/goals", headers= { "Authorization": f"Bearer {token}" }) #Sends a GET request to /goals. Attach token in header
     assert response.status_code == 200 #Check success response
     assert isinstance(response.json(), list) #Check response in a list
 
@@ -23,9 +21,7 @@ def test_create_goal_success(client, token):
         "name": "Buying a Car",
         "end_date": "2027-01-01",
         "target_amount": 15000.00
-    }, headers = {
-        "Authorization": f"Bearer {token}"
-    })
+    }, headers = {"Authorization": f"Bearer {token}"})
     assert response.status_code == 200
     data = response.json() #Parse response body
     assert "goal_id" in data #Check that goal_id was returned
@@ -43,9 +39,7 @@ def test_create_goal_missing_field(client, token):
     response = client.post("/goals", json={ #Sends POST request with missing field. Goal_end is intenionally missing
         "name": "Buying a Car",
         "target_amount": 15000.00
-    }, headers={
-        "Authorization": f"Bearer {token}"
-    })
+    }, headers={"Authorization": f"Bearer {token}"})
     assert response.status_code == 422 #Should return a 422 Validation Error 
 
 # ---- PUT /goals/{goal_id} tests ---- #
@@ -55,9 +49,7 @@ def test_update_goal_success(client, token):
         "name": "Buying a Better Car", #Updated goal name
         "end_date": "2027-03-06", #Updated end date
         "target_amount": 12500.00 #Updated target amount
-    }, headers={
-        "Authorization": f"Bearer {token}"
-    })
+    }, headers={"Authorization": f"Bearer {token}"})
     assert response.status_code == 200
     assert response.json()["message"] == "Goal Successfully Updated!"
 
@@ -74,9 +66,7 @@ def test_update_goal_no_token(client):
 # ---- DELETE /goals/{goal_id} tests ---- #
 def test_delete_goal_success(client, token):
     assert created_goal_id is not None 
-    response = client.delete(f"/goals/{created_goal_id}", headers={  #Sends DELETE request
-        "Authorization": f"Bearer {token}"
-    })
+    response = client.delete(f"/goals/{created_goal_id}", headers={"Authorization": f"Bearer {token}"}) #Sends DELETE request
     assert response.status_code == 200
     assert response.json()["message"] == "Goal Successfully Deleted!"
 
