@@ -1,5 +1,4 @@
 #This file defines the signup route for the FastAPI application, allowing users to create new accounts using Supabase for authentication and user management. It includes error handling to manage potential issues during the signup process.
-
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from supabase_client import supabase

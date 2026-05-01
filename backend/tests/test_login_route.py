@@ -1,5 +1,3 @@
-
-
 #---- Testing Login Route ----#
 def test_login(client, signup_user):
     response = client.post('/login', json={ #Sends a POST request to the login endpoint with test user credentials
