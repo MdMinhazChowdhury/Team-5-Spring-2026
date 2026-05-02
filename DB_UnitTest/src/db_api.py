@@ -1,4 +1,3 @@
-
 from typing import Any, Dict, List, Optional
 import datetime
 
@@ -182,7 +181,6 @@ class FinanceRepository:
     def get_user_summary(self) -> Optional[Dict[str, Any]]:
         rows = self.db.rpc("get_user_summary", {})
 
-        # Rainy-case protection: rows must be a list with at least one element
         if not isinstance(rows, list):
             return None
         if len(rows) == 0:
@@ -207,3 +205,23 @@ class FinanceRepository:
             "category_id": category_id,
         })
         return rows[0] if rows else None
+
+    # ---------- BUDGETS ----------
+
+    def get_budgets(self, year: int, month: int):
+        return self.db.rpc("get_budgets", {
+            "p_year": year,
+            "p_month": month,
+        })
+
+    def upsert_budget(self, category_id: int, monthly_limit: float, month: str):
+        return self.db.rpc("upsert_budget", {
+            "p_category_id": category_id,
+            "p_monthly_limit": monthly_limit,
+            "p_month": month,
+        })
+
+    def delete_budget(self, budget_id: str):
+        return self.db.rpc("delete_budget", {
+            "p_budget_id": budget_id,
+        })

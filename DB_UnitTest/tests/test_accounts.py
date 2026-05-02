@@ -79,6 +79,7 @@ def test_get_accounts_wrong_structure():
     # Should return the raw value, even if wrong
     assert isinstance(result, dict)
 
+#BOUNDARY CASE
 def test_get_accounts_empty_list():
     stub = DbClientStub()
     repo = FinanceRepository(stub)

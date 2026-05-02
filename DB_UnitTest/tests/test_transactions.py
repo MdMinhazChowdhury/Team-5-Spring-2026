@@ -53,3 +53,52 @@ def test_get_transactions_by_date_sunny():
 
     assert len(result) == 1
     assert result[0]["Trans_Total"] == -20.0
+
+#RAINY DAY CASE
+
+def test_create_transaction_negative_amount():
+    stub = DbClientStub()
+    repo = FinanceRepository(stub)
+
+    params = {
+        "account_id": 1,
+        "amount": -999999,
+        "category_id": 2,
+        "date_of_transaction": datetime.date(2025, 1, 1),
+    }
+    stub.set_fake_result("create_transaction", params, None)
+
+    result = repo.create_transaction(
+        1, -999999, 2, datetime.date(2025, 1, 1)
+    )
+
+    assert result is None
+
+def test_get_transaction_by_id_empty_list():
+    stub = DbClientStub()
+    repo = FinanceRepository(stub)
+
+    params = {"transaction_id": 123}
+    stub.set_fake_result("get_transaction_by_id", params, [])
+
+    result = repo.get_transaction_by_id(123)
+
+    assert result is None
+
+#BOUNDARY CASE
+def test_get_transactions_by_date_no_results():
+    stub = DbClientStub()
+    repo = FinanceRepository(stub)
+
+    params = {
+        "start_date": datetime.date(2025, 1, 1),
+        "end_date": datetime.date(2025, 1, 2),
+    }
+    stub.set_fake_result("get_transactions_by_date", params, [])
+
+    result = repo.get_transactions_by_date(
+        datetime.date(2025, 1, 1),
+        datetime.date(2025, 1, 2),
+    )
+
+    assert result == []

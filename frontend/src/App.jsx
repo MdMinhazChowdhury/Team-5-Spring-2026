@@ -3,6 +3,8 @@ import Navbar from './components/Navbar'
 import Dashboard from './pages/Dashboard'
 import Login from './pages/Login'
 import Transactions from './pages/Transactions'
+import Goals from './pages/Goals'
+import Budget from './pages/Budget'
 
 function Layout() {
   return (
@@ -34,8 +36,8 @@ export default function App() {
         >
           <Route path="/" element={<Dashboard />} />
           <Route path="/transactions" element={<Transactions />} />
-          <Route path="/budget" element={<div><h1>Budget</h1><p>Coming soon.</p></div>} />
-          <Route path="/goals" element={<div><h1>Goals</h1><p>Coming soon.</p></div>} />
+          <Route path="/budget" element={<Budget />} />
+          <Route path="/goals" element={<Goals />} />
           <Route path="/reports" element={<div><h1>Reports</h1><p>Coming soon.</p></div>} />
         </Route>
       </Routes>
