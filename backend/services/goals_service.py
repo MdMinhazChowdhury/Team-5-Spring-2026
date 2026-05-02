@@ -1,7 +1,7 @@
 from supabase_client import supabase
 
 def get_financial_goals(token: str):
-    return supabase.postgrest.auth(token).rpc("get_financial_goals", {}).execute().data #Authenticates the request with the user's token and calls the "get_financial_goals" RPC function in the database with the necessary parameters. The ".execute().data" part executes the RPC call and retrieves the resulting data, which is then returned to the caller.
+    return supabase.postgrest.auth(token).rpc("get_financial_goals", {}).execute().data #Authenticates the request with the user's token and calls the "get_goals" RPC function in the database with the necessary parameters. The ".execute().data" part executes the RPC call and retrieves the resulting data, which is then returned to the caller.
 
 def create_financial_goal(token: str, name: str, end_date: str, target_amount: float): 
     return supabase.postgrest.auth(token).rpc("create_financial_goal", { 

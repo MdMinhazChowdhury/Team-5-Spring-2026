@@ -23,7 +23,6 @@ def test_upsert_budget(token):
     )
 
     budgets = get_budgets(token=token, year = 2027, month = 1)
-    print(f"\nBudgets response = {budgets}")
     assert budgets is not None
     assert len(budgets) > 0
     created_budget_id = budgets[0]["budget_id"]
