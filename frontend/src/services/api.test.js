@@ -71,7 +71,7 @@ describe('transactionApi', () => {
 })
 
 describe('authApi', () => {
-  it('login sends POST to /auth/login', async () => {
+  it('login sends POST to /login', async () => {
     fetch.mockResolvedValue({
       ok: true,
       json: async () => ({ access_token: 'abc123' }),

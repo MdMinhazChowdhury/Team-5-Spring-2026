@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { budgetApi, categoriesApi, transactionApi } from '../services/api'
 
-// TODO: replace with budgetApi.get(year, month)
 const MOCK_BUDGET_CATEGORIES = [
   { id: 1, title: 'Rent/Mortgage', limit: 1200, spent: 1200 },
   { id: 2, title: 'Utilities', limit: 250, spent: 200 },
@@ -12,6 +12,53 @@ const MOCK_BUDGET_CATEGORIES = [
 const MOCK_INCOME = 4500
 
 const PAYMENT_FREQUENCIES = ['Monthly', 'Bi-Weekly', 'Weekly', 'Semi-Monthly']
+
+function hasAuthToken() {
+  return Boolean(localStorage.getItem('token'))
+}
+
+function currentBudgetPeriod() {
+  const now = new Date()
+  return {
+    year: now.getFullYear(),
+    month: now.getMonth() + 1,
+    monthDate: `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`,
+  }
+}
+
+function normalizeBudget(row) {
+  return {
+    id: row.id ?? row.budget_id ?? row.BudgetID ?? row.category_id ?? row.CategoryID,
+    budgetId: row.budget_id ?? row.BudgetID ?? row.id,
+    categoryId: row.category_id ?? row.CategoryID,
+    title: row.title ?? row.category_title ?? row.Category_Title ?? 'Uncategorized',
+    limit: Number(row.limit ?? row.monthly_limit ?? row.MonthlyLimit ?? 0),
+    spent: Math.abs(Number(row.spent ?? row.total_spent ?? 0)),
+  }
+}
+
+function normalizeCategory(row) {
+  return {
+    id: row.CategoryID ?? row.category_id ?? row.id,
+    categoryId: row.CategoryID ?? row.category_id ?? row.id,
+    title: row.Category_Title ?? row.category_title ?? row.title ?? 'Uncategorized',
+    limit: 0,
+    spent: 0,
+  }
+}
+
+function mergeBudgetRows(categoryRows, budgetRows) {
+  const baseCategories = categoryRows.map(normalizeCategory)
+  const budgetByCategory = new Map(budgetRows.map((row) => [row.categoryId, row]))
+
+  if (baseCategories.length === 0) return budgetRows
+
+  return baseCategories.map((category) => ({
+    ...category,
+    ...(budgetByCategory.get(category.categoryId) || {}),
+    id: budgetByCategory.get(category.categoryId)?.id ?? category.id,
+  }))
+}
 
 function fmt(val) {
   return `$${Number(val).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
@@ -127,9 +174,43 @@ export default function Budget() {
   const [frequency, setFrequency] = useState('Monthly')
   const [categories, setCategories] = useState(MOCK_BUDGET_CATEGORIES)
   const [activeTab, setActiveTab] = useState('overview')
+  const [error, setError] = useState('')
   const [limitInputs, setLimitInputs] = useState(
     Object.fromEntries(MOCK_BUDGET_CATEGORIES.map(c => [c.id, String(c.limit)]))
   )
+
+  useEffect(() => {
+    if (!hasAuthToken()) return
+
+    const { year, month } = currentBudgetPeriod()
+
+    Promise.all([
+      budgetApi.getAll(year, month),
+      categoriesApi.getAll(),
+      transactionApi.getMonthlyIncome(year, month),
+    ])
+      .then(([budgetRows, categoryRows, incomeResult]) => {
+        const rows = Array.isArray(budgetRows) ? budgetRows : budgetRows.budgets || []
+        const categoriesList = Array.isArray(categoryRows) ? categoryRows : categoryRows.categories || []
+        const nextCategories = mergeBudgetRows(categoriesList, rows.map(normalizeBudget))
+
+        if (nextCategories.length > 0) {
+          setCategories(nextCategories)
+          setLimitInputs(Object.fromEntries(nextCategories.map(c => [c.id, String(c.limit)])))
+        }
+
+        const monthlyIncome = Number(incomeResult.total ?? incomeResult.income ?? 0)
+        if (monthlyIncome > 0) {
+          setIncome(monthlyIncome)
+          setIncomeInput(String(monthlyIncome))
+        }
+
+        setError('')
+      })
+      .catch(() => {
+        setError('Using sample budget data until the budget API is available.')
+      })
+  }, [])
 
   const totalBudgeted = categories.reduce((sum, c) => sum + c.limit, 0)
   const totalSpent = categories.reduce((sum, c) => sum + c.spent, 0)
@@ -147,10 +228,28 @@ export default function Budget() {
     setLimitInputs(prev => ({ ...prev, [id]: value }))
   }
 
-  function handleLimitBlur(id) {
+  async function handleLimitBlur(id) {
     const val = parseFloat(limitInputs[id])
     if (!isNaN(val) && val >= 0) {
       setCategories(prev => prev.map(c => c.id === id ? { ...c, limit: val } : c))
+
+      if (hasAuthToken()) {
+        const cat = categories.find(c => c.id === id)
+        if (!cat) return
+
+        const { monthDate } = currentBudgetPeriod()
+
+        try {
+          await budgetApi.upsert({
+            category_id: cat.categoryId ?? cat.id,
+            monthly_limit: val,
+            month: monthDate,
+          })
+          setError('')
+        } catch (err) {
+          setError(err.message)
+        }
+      }
     } else {
       const cat = categories.find(c => c.id === id)
       setLimitInputs(prev => ({ ...prev, [id]: String(cat.limit) }))
@@ -163,6 +262,8 @@ export default function Budget() {
         <div style={s.heading}>Budget</div>
         <div style={s.sub}>Manage your monthly budget allocations and track spending.</div>
       </div>
+
+      {error && <div style={{ ...s.card, color: '#b45309', fontSize: 13 }}>{error}</div>}
 
       {/* Top row: Income Setup + Monthly Summary */}
       <div style={s.topRow}>
@@ -239,7 +340,7 @@ export default function Budget() {
         </div>
         <div style={s.unallocatedNote}>
           {unallocated > 0
-            ? `${fmt(unallocated)} unallocated — consider adding it to savings or a goal.`
+            ? `${fmt(unallocated)} unallocated - consider adding it to savings or a goal.`
             : unallocated === 0
             ? 'All income is allocated across budget categories.'
             : `Budget categories exceed income by ${fmt(Math.abs(unallocated))}.`}

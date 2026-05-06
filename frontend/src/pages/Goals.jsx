@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { goalsApi } from '../services/api'
 
-// TODO: replace with goalsApi.getAll()
 const MOCK_GOALS = [
   { id: '1', name: 'Emergency Fund', category: 'Savings', target: 5000, current: 3200, endDate: '2026-12-31' },
   { id: '2', name: 'Vacation to Europe', category: 'Travel', target: 3500, current: 1200, endDate: '2027-06-30' },
@@ -11,6 +11,36 @@ const MOCK_GOALS = [
 const GOAL_CATEGORIES = ['Savings', 'Travel', 'Electronics', 'Vehicle', 'Education', 'Home', 'Other']
 
 const EMPTY_FORM = { name: '', category: 'Savings', target: '', current: '', endDate: '' }
+
+function hasAuthToken() {
+  return Boolean(localStorage.getItem('token'))
+}
+
+function normalizeGoal(goal) {
+  return {
+    id: String(goal.id ?? goal.goal_id ?? goal.GoalID ?? ''),
+    name: goal.name ?? goal.goal_name ?? goal.Goal_Name ?? '',
+    category: goal.category ?? goal.category_title ?? goal.Category_Title ?? 'Other',
+    target: Number(goal.target ?? goal.end_goal_amount ?? goal.End_Goal_Amount ?? 0),
+    current: Number(goal.current ?? goal.current_goal_amount ?? goal.Current_Goal_Amount ?? 0),
+    endDate: goal.endDate ?? goal.end_date ?? goal.goal_end ?? goal.Goal_End ?? '',
+  }
+}
+
+function goalPayload(goal) {
+  return {
+    goal_name: goal.name,
+    goal_end: goal.endDate,
+    end_goal_amount: goal.target,
+    current_goal_amount: goal.current,
+    category: goal.category,
+  }
+}
+
+function goalIdFromResponse(response, fallbackId) {
+  if (typeof response === 'string') return response
+  return response?.id ?? response?.goal_id ?? response?.GoalID ?? fallbackId
+}
 
 function fmt(val) {
   return `$${Number(val).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
@@ -272,6 +302,21 @@ export default function Goals() {
   const [activeTab, setActiveTab] = useState('active')
   const [showModal, setShowModal] = useState(false)
   const [editingGoal, setEditingGoal] = useState(null)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    if (!hasAuthToken()) return
+
+    goalsApi.getAll()
+      .then((data) => {
+        const rows = Array.isArray(data) ? data : data.goals || []
+        setGoals(rows.map(normalizeGoal))
+        setError('')
+      })
+      .catch(() => {
+        setError('Using sample goals until the goals API is available.')
+      })
+  }, [])
 
   const totalTarget = goals.reduce((sum, g) => sum + g.target, 0)
   const totalSaved = goals.reduce((sum, g) => sum + g.current, 0)
@@ -281,23 +326,53 @@ export default function Goals() {
   const completedGoals = goals.filter(g => g.current >= g.target)
   const displayed = activeTab === 'active' ? activeGoals : completedGoals
 
-  function handleAdd(data) {
-    const newGoal = { ...data, id: String(Date.now()) }
-    setGoals(prev => [...prev, newGoal])
+  async function handleAdd(data) {
+    const draftGoal = { ...data, id: String(Date.now()) }
+    setGoals(prev => [...prev, draftGoal])
     setShowModal(false)
+
+    if (!hasAuthToken()) return
+
+    try {
+      const saved = await goalsApi.create(goalPayload(data))
+      const savedGoal = normalizeGoal({ ...data, ...(typeof saved === 'object' ? saved : {}), id: goalIdFromResponse(saved, draftGoal.id) })
+      setGoals(prev => prev.map(g => g.id === draftGoal.id ? savedGoal : g))
+      setError('')
+    } catch (err) {
+      setError(err.message)
+    }
   }
 
   function handleEdit(goal) {
     setEditingGoal(goal)
   }
 
-  function handleSaveEdit(data) {
-    setGoals(prev => prev.map(g => g.id === editingGoal.id ? { ...data, id: editingGoal.id } : g))
+  async function handleSaveEdit(data) {
+    const updatedGoal = { ...data, id: editingGoal.id }
+    setGoals(prev => prev.map(g => g.id === editingGoal.id ? updatedGoal : g))
     setEditingGoal(null)
+
+    if (!hasAuthToken()) return
+
+    try {
+      await goalsApi.update(editingGoal.id, goalPayload(data))
+      setError('')
+    } catch (err) {
+      setError(err.message)
+    }
   }
 
-  function handleDelete(id) {
+  async function handleDelete(id) {
     setGoals(prev => prev.filter(g => g.id !== id))
+
+    if (!hasAuthToken()) return
+
+    try {
+      await goalsApi.delete(id)
+      setError('')
+    } catch (err) {
+      setError(err.message)
+    }
   }
 
   return (
@@ -309,6 +384,8 @@ export default function Goals() {
         </div>
         <button style={s.addBtn} onClick={() => setShowModal(true)}>+ Add New Goal</button>
       </div>
+
+      {error && <div style={{ ...s.card, color: '#b45309', fontSize: 13 }}>{error}</div>}
 
       {/* Summary row */}
       <div style={s.summaryRow}>
