@@ -170,7 +170,7 @@ describe('Auth & Transactions integration', () => {
     await userEvent.selectOptions(screen.getByLabelText(/Category/i), '1')
     await userEvent.selectOptions(screen.getByLabelText(/Account/i), '1')
 
-    fireEvent.click(screen.getByRole('button', { name: /Add Transaction/i }))
+    fireEvent.click(screen.getByRole('button', { name: /^Add Transaction$/i }))
     await waitFor(() => expect(screen.getByText('New Bonus')).toBeInTheDocument())
   })
 })

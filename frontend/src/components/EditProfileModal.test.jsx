@@ -101,8 +101,8 @@ describe('EditProfileModal', () => {
   it('renders linked accounts fetched from API', async () => {
     setupAccountsFetch()
     render(<EditProfileModal {...defaultProps} />)
-    await waitFor(() => expect(screen.getByText('Checking')).toBeInTheDocument())
-    expect(screen.getByText('Savings')).toBeInTheDocument()
+    await waitFor(() => expect(screen.getAllByText('Checking').length).toBeGreaterThan(0))
+    expect(screen.getAllByText('Savings').length).toBeGreaterThan(0)
   })
 
   it('adds a new account and shows it in the list', async () => {
@@ -121,11 +121,12 @@ describe('EditProfileModal', () => {
   it('removes an account after clicking delete', async () => {
     setupAccountsFetch()
     render(<EditProfileModal {...defaultProps} />)
-    await waitFor(() => expect(screen.getByText('Checking')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getAllByText('Checking').length).toBeGreaterThan(0))
 
     fireEvent.click(screen.getAllByRole('button', { name: 'Delete account' })[0])
-    await waitFor(() => expect(screen.queryByText('Checking')).not.toBeInTheDocument())
-    expect(screen.getByText('Savings')).toBeInTheDocument()
+    // after delete, 'Checking' only remains as a dropdown option (length === 1)
+    await waitFor(() => expect(screen.getAllByText('Checking')).toHaveLength(1))
+    expect(screen.getAllByText('Savings').length).toBeGreaterThan(0)
   })
 
   it('calls onClose when the close button is clicked', async () => {
