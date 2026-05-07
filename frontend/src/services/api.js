@@ -53,6 +53,14 @@ export const transactionApi = {
     fetch(`${BASE_URL}/transactions/monthly-spending?year=${year}&month=${month}`, {
       headers: authHeader(),
     }).then((r) => r.json()),
+
+  getSpendingByCategory: (startDate, endDate) =>
+    fetch(`${BASE_URL}/transactions/spending-by-category?start_date=${startDate}&end_date=${endDate}`, {
+      headers: authHeader(),
+    }).then((r) => {
+      if (!r.ok) throw new Error('Failed to load spending by category')
+      return r.json()
+    }),
 }
 
 export const authApi = {

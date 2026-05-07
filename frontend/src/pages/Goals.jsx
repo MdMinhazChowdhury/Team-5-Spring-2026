@@ -1,13 +1,6 @@
 import { useEffect, useState } from 'react'
 import { goalsApi } from '../services/api'
 
-const MOCK_GOALS = [
-  { id: '1', name: 'Emergency Fund', category: 'Savings', target: 5000, current: 3200, endDate: '2026-12-31' },
-  { id: '2', name: 'Vacation to Europe', category: 'Travel', target: 3500, current: 1200, endDate: '2027-06-30' },
-  { id: '3', name: 'New Laptop', category: 'Electronics', target: 2000, current: 850, endDate: '2026-09-30' },
-  { id: '4', name: 'Car Down Payment', category: 'Vehicle', target: 8000, current: 2500, endDate: '2027-03-31' },
-]
-
 const GOAL_CATEGORIES = ['Savings', 'Travel', 'Electronics', 'Vehicle', 'Education', 'Home', 'Other']
 
 const EMPTY_FORM = { name: '', category: 'Savings', target: '', current: '', endDate: '' }
@@ -298,7 +291,7 @@ function GoalModal({ initial, onSave, onClose }) {
 }
 
 export default function Goals() {
-  const [goals, setGoals] = useState(MOCK_GOALS)
+  const [goals, setGoals] = useState([])
   const [activeTab, setActiveTab] = useState('active')
   const [showModal, setShowModal] = useState(false)
   const [editingGoal, setEditingGoal] = useState(null)
@@ -314,7 +307,7 @@ export default function Goals() {
         setError('')
       })
       .catch(() => {
-        setError('Using sample goals until the goals API is available.')
+        setError('Failed to load goals. Please try again.')
       })
   }, [])
 

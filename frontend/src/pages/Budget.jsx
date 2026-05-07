@@ -1,16 +1,6 @@
 import { useEffect, useState } from 'react'
 import { budgetApi, categoriesApi, transactionApi } from '../services/api'
 
-const MOCK_BUDGET_CATEGORIES = [
-  { id: 1, title: 'Rent/Mortgage', limit: 1200, spent: 1200 },
-  { id: 2, title: 'Utilities', limit: 250, spent: 200 },
-  { id: 3, title: 'Groceries', limit: 500, spent: 450 },
-  { id: 4, title: 'Transportation', limit: 200, spent: 150 },
-  { id: 5, title: 'Entertainment', limit: 200, spent: 180 },
-  { id: 6, title: 'Healthcare', limit: 150, spent: 35 },
-]
-const MOCK_INCOME = 4500
-
 const PAYMENT_FREQUENCIES = ['Monthly', 'Bi-Weekly', 'Weekly', 'Semi-Monthly']
 
 function hasAuthToken() {
@@ -169,15 +159,13 @@ function progressBarColor(pct) {
 }
 
 export default function Budget() {
-  const [income, setIncome] = useState(MOCK_INCOME)
-  const [incomeInput, setIncomeInput] = useState(String(MOCK_INCOME))
+  const [income, setIncome] = useState(0)
+  const [incomeInput, setIncomeInput] = useState('0')
   const [frequency, setFrequency] = useState('Monthly')
-  const [categories, setCategories] = useState(MOCK_BUDGET_CATEGORIES)
+  const [categories, setCategories] = useState([])
   const [activeTab, setActiveTab] = useState('overview')
   const [error, setError] = useState('')
-  const [limitInputs, setLimitInputs] = useState(
-    Object.fromEntries(MOCK_BUDGET_CATEGORIES.map(c => [c.id, String(c.limit)]))
-  )
+  const [limitInputs, setLimitInputs] = useState({})
 
   useEffect(() => {
     if (!hasAuthToken()) return
@@ -208,7 +196,7 @@ export default function Budget() {
         setError('')
       })
       .catch(() => {
-        setError('Using sample budget data until the budget API is available.')
+        setError('Failed to load budget data. Please try again.')
       })
   }, [])
 

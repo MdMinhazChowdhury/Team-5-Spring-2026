@@ -11,46 +11,47 @@ import {
   ResponsiveContainer,
 } from 'recharts'
 import SpendingChart from '../components/SpendingChart'
-import { userApi, accountsApi, transactionApi } from '../services/api'
+import { userApi, accountsApi, transactionApi, goalsApi, budgetApi } from '../services/api'
 
-// Set to true to use hardcoded mock data instead of live API calls
-const USE_MOCK_DATA = false
+const CHART_COLORS = ['#0e1c4f', '#336659', '#bba591', '#8b5e52', '#6b8f86', '#c9a882', '#4a7c6f', '#a0522d']
 
-const MOCK_ACCOUNTS = [
-  { account_id: 1, account_type_name: 'Checking', account_balance: 3200.50 },
-  { account_id: 2, account_type_name: 'Savings', account_balance: 9640.00 },
-]
+function getLastSixMonths() {
+  const now = new Date()
+  const months = []
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
+    months.push({
+      year: d.getFullYear(),
+      month: d.getMonth() + 1,
+      label: d.toLocaleString('en-US', { month: 'short' }),
+    })
+  }
+  return months
+}
 
-const SPENDING_DATA = [
-  { name: 'Rent', value: 1500, color: '#0e1c4f' },
-  { name: 'Groceries', value: 580, color: '#336659' },
-  { name: 'Transport', value: 220, color: '#bba591' },
-  { name: 'Utilities', value: 180, color: '#8b5e52' },
-  { name: 'Entertainment', value: 120, color: '#6b8f86' },
-  { name: 'Other', value: 200, color: '#c9a882' },
-]
+function normalizeSpendingRow(row, index) {
+  return {
+    name: row.category_title ?? row.Category_Title ?? row.category ?? 'Other',
+    value: Math.abs(Number(row.total_spent ?? row.total ?? row.amount ?? 0)),
+    color: CHART_COLORS[index % CHART_COLORS.length],
+  }
+}
 
-const BAR_DATA = [
-  { month: 'Nov', income: 4200, expenses: 2800 },
-  { month: 'Dec', income: 4500, expenses: 3200 },
-  { month: 'Jan', income: 4200, expenses: 2900 },
-  { month: 'Feb', income: 4200, expenses: 2700 },
-  { month: 'Mar', income: 4800, expenses: 3100 },
-  { month: 'Apr', income: 4200, expenses: 2800 },
-]
+function normalizeTransaction(tx) {
+  return {
+    id: tx.transaction_id ?? tx.id,
+    description: tx.description ?? tx.Description ?? 'Transaction',
+    category: tx.category_title ?? tx.Category_Title ?? tx.category ?? '',
+    amount: Number(tx.amount ?? tx.Amount ?? 0),
+    date: tx.date_of_transaction ?? tx.date ?? '',
+  }
+}
 
-const RECENT_TRANSACTIONS = [
-  { id: 1, description: 'Whole Foods Market', category: 'Groceries', amount: -84.32, date: 'Apr 16' },
-  { id: 2, description: 'Salary Deposit', category: 'Income', amount: 4200.00, date: 'Apr 15' },
-  { id: 3, description: 'Netflix', category: 'Entertainment', amount: -15.99, date: 'Apr 14' },
-  { id: 4, description: 'Electric Bill', category: 'Utilities', amount: -92.40, date: 'Apr 13' },
-  { id: 5, description: 'Uber', category: 'Transport', amount: -24.50, date: 'Apr 12' },
-]
-
-const BUDGET_ALERTS = [
-  { category: 'Entertainment', spent: 120, limit: 150, color: '#336659' },
-  { category: 'Dining Out', spent: 210, limit: 200, color: '#dc2626' },
-]
+function fmtDate(dateStr) {
+  if (!dateStr) return ''
+  const d = new Date(dateStr + 'T00:00:00')
+  return d.toLocaleString('en-US', { month: 'short', day: 'numeric' })
+}
 
 const s = {
   page: { display: 'flex', flexDirection: 'column', gap: 24 },
@@ -164,33 +165,103 @@ function fmt(value) {
 }
 
 export default function Dashboard() {
-  const savingsGoalPct = Math.round((1240 / 5000) * 100)
   const [firstName, setFirstName] = useState('')
-  const [accounts, setAccounts] = useState(USE_MOCK_DATA ? MOCK_ACCOUNTS : [])
-  const [totalBalance, setTotalBalance] = useState(USE_MOCK_DATA ? 12840.50 : null)
-  const [monthlyIncome, setMonthlyIncome] = useState(USE_MOCK_DATA ? 4200.00 : null)
-  const [monthlyExpenses, setMonthlyExpenses] = useState(USE_MOCK_DATA ? 2800.21 : null)
+  const [accounts, setAccounts] = useState([])
+  const [totalBalance, setTotalBalance] = useState(null)
+  const [monthlyIncome, setMonthlyIncome] = useState(null)
+  const [monthlyExpenses, setMonthlyExpenses] = useState(null)
+  const [spendingData, setSpendingData] = useState([])
+  const [barData, setBarData] = useState([])
+  const [recentTransactions, setRecentTransactions] = useState([])
+  const [budgetAlerts, setBudgetAlerts] = useState([])
+  const [savingsGoal, setSavingsGoal] = useState(null)
 
   useEffect(() => {
+    const now = new Date()
+    const year = now.getFullYear()
+    const month = now.getMonth() + 1
+    const startDate = `${year}-${String(month).padStart(2, '0')}-01`
+    const lastDay = new Date(year, month, 0).getDate()
+    const endDate = `${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`
+
     userApi.getProfile().then((u) => setFirstName(u.first_name)).catch(() => {})
 
-    if (!USE_MOCK_DATA) {
-      const now = new Date()
-      const year = now.getFullYear()
-      const month = now.getMonth() + 1
+    Promise.all([
+      accountsApi.getAll(),
+      transactionApi.getMonthlyIncome(year, month),
+      transactionApi.getMonthlySpending(year, month),
+    ]).then(([accts, income, expenses]) => {
+      setAccounts(accts)
+      setTotalBalance(accts.reduce((sum, a) => sum + a.account_balance, 0))
+      setMonthlyIncome(income.total)
+      setMonthlyExpenses(Math.abs(expenses.total))
+    }).catch(() => {})
 
-      Promise.all([
-        accountsApi.getAll(),
-        transactionApi.getMonthlyIncome(year, month),
-        transactionApi.getMonthlySpending(year, month),
-      ]).then(([accts, income, expenses]) => {
-        setAccounts(accts)
-        setTotalBalance(accts.reduce((sum, a) => sum + a.account_balance, 0))
-        setMonthlyIncome(income.total)
-        setMonthlyExpenses(Math.abs(expenses.total))
-      }).catch(() => {})
-    }
+    transactionApi.getSpendingByCategory(startDate, endDate)
+      .then((rows) => {
+        const normalized = (rows || [])
+          .map(normalizeSpendingRow)
+          .filter((r) => r.value > 0)
+        setSpendingData(normalized)
+      })
+      .catch(() => {})
+
+    transactionApi.getAll()
+      .then((txs) => {
+        setRecentTransactions((txs || []).slice(0, 5).map(normalizeTransaction))
+      })
+      .catch(() => {})
+
+    const sixMonths = getLastSixMonths()
+    Promise.all(
+      sixMonths.map(({ year: y, month: m, label }) =>
+        Promise.all([
+          transactionApi.getMonthlyIncome(y, m),
+          transactionApi.getMonthlySpending(y, m),
+        ]).then(([inc, exp]) => ({
+          month: label,
+          income: Number(inc.total ?? 0),
+          expenses: Math.abs(Number(exp.total ?? 0)),
+        }))
+      )
+    ).then((data) => setBarData(data)).catch(() => {})
+
+    budgetApi.getAll(year, month)
+      .then((rows) => {
+        const budgets = Array.isArray(rows) ? rows : rows.budgets || []
+        const alerts = budgets
+          .map((b) => ({
+            category: b.title ?? b.category_title ?? b.Category_Title ?? 'Uncategorized',
+            spent: Math.abs(Number(b.spent ?? b.total_spent ?? 0)),
+            limit: Number(b.limit ?? b.monthly_limit ?? 0),
+          }))
+          .filter((b) => b.limit > 0 && b.spent / b.limit >= 0.8)
+          .map((b) => ({
+            ...b,
+            color: b.spent / b.limit >= 1 ? '#dc2626' : '#336659',
+          }))
+        setBudgetAlerts(alerts)
+      })
+      .catch(() => {})
+
+    goalsApi.getAll()
+      .then((data) => {
+        const list = Array.isArray(data) ? data : data.goals || []
+        if (list.length > 0) {
+          const g = list[0]
+          setSavingsGoal({
+            name: g.name ?? g.goal_name ?? g.Goal_Name ?? 'Savings Goal',
+            current: Number(g.current ?? g.current_goal_amount ?? g.Current_Goal_Amount ?? 0),
+            target: Number(g.target ?? g.end_goal_amount ?? g.End_Goal_Amount ?? 0),
+          })
+        }
+      })
+      .catch(() => {})
   }, [])
+
+  const savingsGoalPct = savingsGoal && savingsGoal.target > 0
+    ? Math.round((savingsGoal.current / savingsGoal.target) * 100)
+    : 0
 
   return (
     <div style={s.page}>
@@ -223,21 +294,21 @@ export default function Dashboard() {
         <StatCard
           title="Monthly Income"
           value={fmt(monthlyIncome)}
-          trend="▲ Stable"
+          trend="This month"
           trendPositive={true}
           valueColor="#16a34a"
         />
         <StatCard
           title="Monthly Expenses"
           value={fmt(monthlyExpenses)}
-          trend="▼ 5.1% from last month"
-          trendPositive={true}
+          trend="This month"
+          trendPositive={false}
           valueColor="#dc2626"
         />
         <StatCard
-          title="Savings Goal"
-          value="$1,240 / $5,000"
-          extra={
+          title={savingsGoal ? savingsGoal.name : 'Savings Goal'}
+          value={savingsGoal ? `${fmt(savingsGoal.current)} / ${fmt(savingsGoal.target)}` : 'No goals set'}
+          extra={savingsGoal && (
             <div style={s.progressTrack}>
               <div
                 style={{
@@ -248,7 +319,7 @@ export default function Dashboard() {
                 }}
               />
             </div>
-          }
+          )}
         />
       </div>
 
@@ -256,13 +327,19 @@ export default function Dashboard() {
       <div style={s.grid2}>
         <div style={s.card}>
           <div style={s.sectionTitle}>Spending by Category</div>
-          <SpendingChart data={SPENDING_DATA} />
+          {spendingData.length > 0 ? (
+            <SpendingChart data={spendingData} />
+          ) : (
+            <div style={{ color: '#8c7260', fontSize: 14, padding: '60px 0', textAlign: 'center' }}>
+              No spending data this month
+            </div>
+          )}
         </div>
 
         <div style={s.card}>
           <div style={s.sectionTitle}>Income vs Expenses (6 months)</div>
           <ResponsiveContainer width="100%" height={260}>
-            <BarChart data={BAR_DATA} barSize={14}>
+            <BarChart data={barData} barSize={14}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
               <XAxis dataKey="month" tick={{ fontSize: 12 }} />
               <YAxis tick={{ fontSize: 12 }} />
@@ -279,48 +356,58 @@ export default function Dashboard() {
       <div style={s.grid2}>
         <div style={s.card}>
           <div style={s.sectionTitle}>Recent Transactions</div>
-          {RECENT_TRANSACTIONS.map((tx) => (
-            <div key={tx.id} style={s.txRow}>
-              <div>
-                <div style={s.txDesc}>{tx.description}</div>
-                <div style={s.txCat}>{tx.category}</div>
+          {recentTransactions.length === 0 ? (
+            <div style={{ color: '#8c7260', fontSize: 14, padding: '16px 0' }}>No transactions yet</div>
+          ) : (
+            recentTransactions.map((tx) => (
+              <div key={tx.id} style={s.txRow}>
+                <div>
+                  <div style={s.txDesc}>{tx.description}</div>
+                  <div style={s.txCat}>{tx.category}</div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <span style={s.txDate}>{fmtDate(tx.date)}</span>
+                  <span style={s.txAmt(tx.amount > 0)}>
+                    {tx.amount > 0 ? '+' : ''}${Math.abs(tx.amount).toFixed(2)}
+                  </span>
+                </div>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <span style={s.txDate}>{tx.date}</span>
-                <span style={s.txAmt(tx.amount > 0)}>
-                  {tx.amount > 0 ? '+' : ''}${Math.abs(tx.amount).toFixed(2)}
-                </span>
-              </div>
-            </div>
-          ))}
+            ))
+          )}
           <Link to="/transactions" style={s.viewAll}>View All Transactions →</Link>
         </div>
 
         <div style={s.card}>
           <div style={s.sectionTitle}>Budget Alerts</div>
-          {BUDGET_ALERTS.map((alert) => {
-            const pct = Math.min(Math.round((alert.spent / alert.limit) * 100), 100)
-            return (
-              <div key={alert.category} style={s.alertRow}>
-                <div style={s.alertHeader}>
-                  <span style={{ fontWeight: 500, fontSize: 14 }}>{alert.category}</span>
-                  <span style={{ color: alert.color, fontSize: 13 }}>
-                    ${alert.spent} / ${alert.limit}
-                  </span>
+          {budgetAlerts.length === 0 ? (
+            <div style={{ color: '#8c7260', fontSize: 14, padding: '16px 0' }}>
+              No budget alerts — all categories within limits.
+            </div>
+          ) : (
+            budgetAlerts.map((alert) => {
+              const pct = Math.min(Math.round((alert.spent / alert.limit) * 100), 100)
+              return (
+                <div key={alert.category} style={s.alertRow}>
+                  <div style={s.alertHeader}>
+                    <span style={{ fontWeight: 500, fontSize: 14 }}>{alert.category}</span>
+                    <span style={{ color: alert.color, fontSize: 13 }}>
+                      ${alert.spent.toFixed(2)} / ${alert.limit.toFixed(2)}
+                    </span>
+                  </div>
+                  <div style={s.progressTrack}>
+                    <div
+                      style={{
+                        width: `${pct}%`,
+                        height: '100%',
+                        background: alert.color,
+                        borderRadius: 999,
+                      }}
+                    />
+                  </div>
                 </div>
-                <div style={s.progressTrack}>
-                  <div
-                    style={{
-                      width: `${pct}%`,
-                      height: '100%',
-                      background: alert.color,
-                      borderRadius: 999,
-                    }}
-                  />
-                </div>
-              </div>
-            )
-          })}
+              )
+            })
+          )}
         </div>
       </div>
     </div>
